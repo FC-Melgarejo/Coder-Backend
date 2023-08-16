@@ -1,0 +1,37 @@
+{
+  "productos_deportivos": [
+    {
+      "id": 1,
+      "title": "Pelota de fútbol",
+      "description": "Balón de fútbol profesional, tamaño oficial, ideal para entrenamientos y partidos.",
+      "code": "FB-12345",
+      "price": 25.99,
+      "thumbnail": "url_del_thumbnail",
+      "status": true,
+      "stock": 15,
+      "category": "Fútbol"
+    },
+    {
+      "id": 2,
+      "title": "Raqueta de tenis",
+      "description": "Raqueta de tenis de alta calidad, perfecta para jugadores intermedios y avanzados.",
+      "code": "TN-67890",
+      "price": 59.99,
+      "thumbnail": "url_del_thumbnail",
+      "status": true,
+      "stock": 20,
+      "category": "Tenis"
+    },
+    {
+      "id": 3,
+      "title": "Bicicleta de montaña",
+      "description": "Bicicleta de montaña resistente y duradera, diseñada para aventuras en terrenos difíciles.",
+      "code": "BC-54321",
+      "price": 349.99,
+      "thumbnail": "url_del_thumbnail",
+      "status": true,
+      "stock": 25,
+      "category": "Ciclismo"
+    }
+  ]
+}

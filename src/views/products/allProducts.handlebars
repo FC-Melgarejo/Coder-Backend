@@ -1,0 +1,16 @@
+  <h1>All Products</h1>
+    <ul>
+        {{#each products}}
+            <li>
+                <h2>{{title}}</h2>
+                <p>Description: {{description}}</p>
+                <p>Price: {{price}}</p>
+                <p>Category: {{category}}</p>
+                <form action="/cart/{{cartId}}/add" method="post">
+                    <input type="hidden" name="productId" value="{{_id}}">
+                    <button type="submit">Add to Cart</button>
+                </form>
+                <a href="/products/{{_id}}">View Details</a>
+            </li>
+        {{/each}}
+    </ul>
