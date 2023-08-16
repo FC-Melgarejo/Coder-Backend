@@ -1,6 +1,5 @@
 const express = require('express');
 const handlebars = require('express-handlebars');
-const handleSocketConnection = require('./utils/socketHandlebars')
 const mongoose = require('mongoose');
 const { Server } = require('socket.io')
 
@@ -47,8 +46,7 @@ const httpServer = app.listen(8080, () => {
   console.log(`Servidor express escuchando en el puerto 8080`);
 });
 // Crear el objeto `io` para la comunicación en tiempo real
-const io = new Server(httpServer)
-handleSocketConnection(io)
+const io = new Server(httpServer);
 
 // Implementación de enrutadores
 const productsRouter = require('./routers/productsRouter');

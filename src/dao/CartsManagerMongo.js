@@ -2,13 +2,20 @@ const Cart = require('./models/cartModel');
 const Producto = require('./models/productModel');
 
 class CartManagerMongo {
+
     async createCart() {
         try {
-           
-            const newCart = await CartManager.createCart();
-             ({ products: [] });
+            const collection = this.db.collection('carts');
+            const newCart = {
+                id: (await collection.countDocuments()) + 1,
+                products: [],
+            };
+
+            await collection.insertOne(newCart);
+
             return newCart;
         } catch (error) {
+            console.log('No se agregó al carrito');
             throw error;
         }
     }
@@ -100,7 +107,7 @@ class CartManagerMongo {
             if (!cart) {
                 throw new Error('Carrito no encontrado');
             }
-
+            
             cart.products = [];
             await cart.save();
         } catch (error) {
@@ -110,6 +117,7 @@ class CartManagerMongo {
 }
 
 module.exports = CartManagerMongo;
+
 
 
 

@@ -1,22 +1,16 @@
-const { Router } = require('express')
+const { Router } = require('express');
 const CartManagerMongo = require('../dao/CartsManagerMongo');
-/* const cartManager = new CartManager('./src/carrito.json') */
-//const CartManager = new  CartManager()//
-const cartsRouter = Router()
+const cartManager = new CartManagerMongo();
+const cartsRouter = Router();
 
-
-cartsRouter.post('/create', async (req, res) => {
+cartsRouter.post('/carts', async (req, res) => {
     try {
-        const newCart = await CartManager.createCart();
-        return res.status(201).json({ status: 'success', message: 'Carrito creado exitosamente', cart: newCart });
+        const newCart = await cartManager.createCart();
+        res.status(201).json(newCart);
     } catch (error) {
-
-        return res.status(500).json({ error: 'Error al crear el carrito', message: error.message });
+        res.status(500).json({ error: 'Error al crear el carrito' });
     }
 });
-
-
-
 cartsRouter.get('/:cid', async (req, res) => {
     const cid = req.params.cid
     try {
@@ -57,7 +51,7 @@ cartsRouter.delete('/:cid/products/:pid', async (req, res) => {
     const productId = req.params.pid;
 
     try {
-        await CartManager.removeProductFromCart(cartId, productId);
+        await cartManager.removeProductFromCart(cartId, productId);
         return res.status(200).json({ status: 'success', message: 'Producto eliminado del carrito' });
     } catch (error) {
         return res.status(500).json({ error: 'Error al eliminar el producto del carrito', message: error.message });
