@@ -2,6 +2,7 @@ const express = require('express');
 const handlebars = require('express-handlebars');
 const mongoose = require('mongoose');
 const { Server } = require('socket.io')
+const cookieParser = require('cookie-parser')
 
 
 const multer = require('multer');
@@ -19,6 +20,7 @@ mongoose.connect(MONGODB_CONNECT)
 // Middleware para el manejo de JSON y datos enviados por formularios
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Configuración handlebars
 app.engine('handlebars', handlebars.engine())

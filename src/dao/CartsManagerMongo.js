@@ -1,122 +1,76 @@
-const Cart = require('./models/cartModel');
-const Producto = require('./models/productModel');
+const cartModel = require('./models/cartModel')
+const productModel = require('./models/productModel')
 
 class CartManagerMongo {
+    constructor() {
+        this.model = cartModel
+    }
 
-    async createCart() {
+    async getCarts() {
         try {
-            const collection = this.db.collection('carts');
-            const newCart = {
-                id: (await collection.countDocuments()) + 1,
-                products: [],
+            const carts = await this.model.find()
+
+            return carts.map(p => p.toObject())
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async getCartById(id) {
+        try {
+            const cart = await this.model.findById(id)
+            if (!cart) {
+                throw new Error('No se encuentra el carrito')
+            }
+            return  cart.toObject()
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async addCart() {
+        try {
+            const newCart = await this.model.create({ product: [] })
+            return newCart
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async addProductToCart(cid, pid) {
+        
+        try {
+            const cart = await this.model.findById(cid)
+        
+            const product = await productModel.findById(pid)
+
+            if (!cart) {
+                throw new Error('No se encuentra el carrito')
+            }
+
+            if (!product) {
+                throw new Error('Producto no encontrado en el inventario')
+            }
+
+            const existingProductInCart = cart.products.findIndex((p) => p.product === pid);
+            const productToAdd = {
+                product: product.id,
+                quantity: 1
             };
 
-            await collection.insertOne(newCart);
+            (existingProductInCart !== -1)
+                ? cart.products[existingProductInCart].quantity++
+                : cart.products.push(productToAdd);
 
-            return newCart;
+            cart.markModified('products')
+            cart.save()
         } catch (error) {
-            console.log('No se agregó al carrito');
-            throw error;
-        }
-    }
-
-    async addProductToCart(cartId, productId) {
-        try {
-            const cart = await Cart.findById(cartId);
-            if (!cart) {
-                throw new Error('Carrito no encontrado');
-            }
-
-            const productoExistente = cart.products.find(product => product.product.toString() === productId);
-            if (productoExistente) {
-                productoExistente.cantidad += 1;
-            } else {
-                cart.products.push({
-                    producto: productId,
-                    cantidad: 1
-                });
-            }
-
-            await cart.save();
-
-            return cart;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    async removeProductFromCart(cartId, productId) {
-        try {
-            const cart = await Cart.findById(cartId);
-            if (!cart) {
-                throw new Error('Carrito no encontrado');
-            }
-
-            cart.products = cart.products.filter(producto => producto.producto.toString() !== productId);
-            await cart.save();
-
-            return cart;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    async updateCartProducts(cartId, updatedProducts) {
-        try {
-            const cart = await Cart.findById(cartId);
-            if (!cart) {
-                throw new Error('Carrito no encontrado');
-            }
-
-            const productosParaAgregar = updatedProducts.map(productId => ({
-                producto: productId,
-                cantidad: 1
-            }));
-
-            cart.products = productosParaAgregar;
-            await cart.save();
-
-            return cart;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    async updateCartItemQuantity(cartId, productId, newQuantity) {
-        try {
-            const cart = await Cart.findById(cartId);
-            if (!cart) {
-                throw new Error('Carrito no encontrado');
-            }
-
-            const indiceProducto = cart.products.findIndex(producto => producto.producto.toString() === productId);
-            if (indiceProducto !== -1) {
-                cart.products[indiceProducto].cantidad = newQuantity;
-                await cart.save();
-            } else {
-                throw new Error('Producto no encontrado en el carrito');
-            }
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    async clearCart(cartId) {
-        try {
-            const cart = await Cart.findById(cartId);
-            if (!cart) {
-                throw new Error('Carrito no encontrado');
-            }
-            
-            cart.products = [];
-            await cart.save();
-        } catch (error) {
-            throw error;
+            throw error
         }
     }
 }
 
-module.exports = CartManagerMongo;
+module.exports = CartManagerMongo
 
 
 
