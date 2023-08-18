@@ -58,6 +58,57 @@ cartsRouter.post('/:cid/:pid', async (req, res) => {
         return res.status(500).json({ error: commonErrorMessage, message: error.message });
     }
 });
+// DELETE api/carts/:cid/products/:pid
+cartsRouter.delete('/:cid/products/:pid', async (req, res) => {
+    const cid = req.params.cid;
+    const pid = req.params.pid;
+    try {await cartManager.removeProductFromCart(cid, pid);
+        return res.status(200).json({ status: 'success', message: 'Producto eliminado del carrito exitosamente' });
+    } catch (error) {
+        const commonErrorMessage = 'Error al eliminar el producto del carrito';
+        return res.status(500).json({ error: commonErrorMessage, message: error.message });
+    }
+});
+
+// PUT api/carts/:cid
+
+cartsRouter.put('/:cid', async (req, res) => {
+    const cid = req.params.cid;
+    const products = req.body.products;
+    try { await cartManager.updateCartProducts(cid, products);
+        return res.status(200).json({ status: 'success', message: 'Carrito actualizado exitosamente' });
+    }catch (error) {
+        const commonErrorMessage = 'Error al actualizar el carrito';
+        // Handle specific error cases if needed
+        return res.status(500).json({ error: commonErrorMessage, message: error.message });
+    }
+}); 
+
+// PUT api/carts/:cid/products/:pid
+cartsRouter.put('/:cid/products/:pid', async (req, res) => {
+    const cid = req.params.cid;
+    const pid = req.params.pid;
+    const quantity = req.body.quantity;
+    try {await cartManager.updateProductQuantity(cid, pid, quantity);
+        return res.status(200).json({ status: 'success', message: 'Cantidad de producto actualizada exitosamente' });
+    } catch (error) {
+        const commonErrorMessage = 'Error al actualizar la cantidad del producto';
+        // Handle specific error cases if needed
+        return res.status(500).json({ error: commonErrorMessage, message: error.message });
+    }
+});
+
+
+// DELETE api/carts/:cid
+cartsRouter.delete('/:cid', async (req, res) => {
+    const cid = req.params.cid;
+    try {  await cartManager.clearCart(cid);
+        return res.status(200).json({ status: 'success', message: 'Productos eliminados del carrito exitosamente' });
+    } catch (error) {
+        const commonErrorMessage = 'Error al eliminar los productos del carrito';
+        return res.status(500).json({ error: commonErrorMessage, message: error.message });
+    }
+    });
 
 module.exports = cartsRouter
 
