@@ -1,14 +1,16 @@
 const express = require('express');
+const session = require('express-session');
+const passport = require('passport');
+const MongoStore = require('connect-mongo');
 const handlebars = require('express-handlebars');
 const mongoose = require('mongoose');
 const { Server } = require('socket.io')
 const cookieParser = require('cookie-parser')
-
-
 const multer = require('multer');
 
-const app = express()
-const MONGODB_CONNECT = `mongodb+srv://melgarejofatimacarolina:8g3ZKFx4JtMWDIRS@cluster0.rhfgipr.mongodb.net/ecommerceretryWrites=true&w=majority`
+
+
+const MONGODB_CONNECT = `mongodb+srv://melgarejofatimacarolina:8g3ZKFx4JtMWDIRS@cluster0.rhfgipr.mongodb.net/ecommerce?retryWrites=true&w=majority`
 mongoose.connect(MONGODB_CONNECT)
   .then(() => console.log('Conexión exitosa a la base de datos'))
   .catch((error) => {
@@ -17,10 +19,31 @@ mongoose.connect(MONGODB_CONNECT)
     }
   })
 
+const app = express()
+
+app.use(cookieParser('secretkey'))
+
+app.use(session({
+
+  store: MongoStore.create({
+    mongoUrl:MONGODB_CONNECT,
+    ttl:90000
+
+  }),
+  secret: 'secretSession',
+  resave: true,
+  saveUninitialized: true
+}));
+
+
+
+
 // Middleware para el manejo de JSON y datos enviados por formularios
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Configuración handlebars
 app.engine('handlebars', handlebars.engine())
@@ -29,7 +52,7 @@ app.set('view engine', 'handlebars')
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/img');
+    cb(null, 'uploader/img');
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname);
@@ -51,11 +74,14 @@ const httpServer = app.listen(8080, () => {
 const io = new Server(httpServer);
 
 // Implementación de enrutadores
+
+const sessionRouter = require('./routers/sessionRouter');
 const productsRouter = require('./routers/productsRouter');
 const cartsRouter = require('./routers/cartsRouter');
 const viewsRouter = require('./routers/viewsRouter');
 
 // Rutas base de enrutadores
+app.use('/api/sessions',sessionRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/carts', cartsRouter);
 app.use('/', viewsRouter);

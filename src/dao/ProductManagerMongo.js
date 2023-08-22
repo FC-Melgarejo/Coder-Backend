@@ -1,5 +1,6 @@
 const productModel = require('./models/productModel');
 
+
 class ProductManagerMongo {
     constructor(io) {
         this.model = productModel;

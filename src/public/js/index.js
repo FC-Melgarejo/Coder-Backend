@@ -1,5 +1,4 @@
 const socket = io()
-console.log(socket);
 const productList = document.getElementById('productos')
 const thumnailsInput = document.getElementById('thumbnails')
 const addProductForm = document.getElementById('add-product-form')
@@ -96,5 +95,13 @@ socket.on('updateProductInView', product => {
   row.cells[5].querySelector("input").value = product.status;
   row.cells[6].querySelector("input").value = product.stock;
   row.cells[7].querySelector("input").value = product.category;
+})
+
+socket.on('notification', notif => {
+  Swal.fire({
+    text: notif,
+    icon: 'info',
+    timer: 3000,
+  });
 })
 

@@ -1,4 +1,7 @@
-  <h1>All Products</h1>
+<h1>Bienvenido, {{ user.username }}</h1>
+
+
+<h1>All Products</h1>
     <ul>
         {{#each products}}
             <li>
@@ -10,7 +13,12 @@
                     <input type="hidden" name="productId" value="{{_id}}">
                     <button type="submit">Add to Cart</button>
                 </form>
-                <a href="/products/{{_id}}">View Details</a>
+                 <td><a href="/products/{{this._id}}">View Details</a></td>
+
             </li>
         {{/each}}
     </ul>
+    
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/index.js"></script>

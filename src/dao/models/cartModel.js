@@ -5,8 +5,7 @@ const cartSchema = mongoose.Schema({
         {
             product: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: 'product'
-                
+                ref: 'product' 
             },
             quantity: {
                 type: Number,
@@ -21,3 +20,4 @@ cartSchema.pre('find', function () {
 });
 
 module.exports = mongoose.model('Cart', cartSchema);
+
