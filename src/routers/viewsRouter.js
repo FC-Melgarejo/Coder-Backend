@@ -2,11 +2,27 @@ const { Router } = require('express');
 const ProductManagerMongo = require('../dao/ProductManagerMongo');
 const CartsManagerMongo = require('../dao/CartsManagerMongo');
 const UserModel = require('../dao/models/userModel');
-
 const productManager = new ProductManagerMongo();
 const cartManager = new CartsManagerMongo();
 const viewsRouter = new Router();
 
+// Ruta para registrar un nuevo usuario
+viewsRouter.post('/register', async (req, res) => {
+    try {
+        const { name, email, password, isAdmin } = req.body;
+        const newUser = new UserModel({
+            name,
+            email,
+            password,
+            isAdmin: isAdmin === 'true' // Convierte la cadena en un valor booleano
+        });
+        await newUser.save();
+        res.status(201).json({ message: 'Usuario registrado con éxito' });
+    } catch (error) {
+        console.error('Error al registrar usuario:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
 
 // Middleware de sesión
 const sessionMiddleware = (req, res, next) => {
@@ -16,25 +32,44 @@ const sessionMiddleware = (req, res, next) => {
     return next();
 };
 
-// Ruta para registrar un nuevo usuario
-viewsRouter.post('/register', async (req, res) => {
-    try {
-        const { name, email, password } = req.body;
-        const newUser = new UserModel({ name, email, password });
-        await newUser.save();
-        res.status(201).json({ message: 'Usuario registrado con éxito' });
-    } catch (error) {
-        console.error('Error al registrar usuario:', error);
-        res.atus(500).json({ error: 'Error interno del servidor' });
+// Middleware para verificar el rol de administrador
+const adminMiddleware = (req, res, next) => {
+    if (req.session.user && req.session.user.isAdmin) {
+        return next(); // El usuario es administrador
     }
+    res.status(403).json({ error: 'Acceso denegado' });
+};
 
+// Ruta de perfil
+viewsRouter.get('/profile', sessionMiddleware, (req, res) => {
+    const user = req.session.user;
+    return res.render('profile', { user });
 });
 
-viewsRouter.get('/register', sessionMiddleware, (req, res) => {
-    return res.render('register');
+// Ruta de productos con mensaje de bienvenida
+viewsRouter.get('/products', sessionMiddleware, (req, res) => {
+    const user = req.session.user;
+    return res.render('products', { user });
 });
 
-// Ruta para el inicio de sesión
+// Ruta de administrador (accesible solo para administradores)
+viewsRouter.get('/admin', sessionMiddleware, adminMiddleware, (req, res) => {
+    const user = req.session.user;
+    return res.render('admin', { user });
+});
+
+// Ruta para cerrar sesión
+viewsRouter.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Error al cerrar sesión:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        return res.redirect('/login'); // Redirige a la vista de login después de cerrar sesión
+    });
+});
+
+// Ruta para iniciar sesión
 viewsRouter.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -44,32 +79,13 @@ viewsRouter.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Credenciales incorrectas' });
         }
         req.session.user = user;
-        res.json({ message: 'Inicio de sesión exitoso', user });
+        // Redirige a la vista de productos después de iniciar sesión
+        return res.redirect('/products');
     } catch (error) {
         console.error('Error al iniciar sesión:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        return res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
-
-
-viewsRouter.get('/login', (req, res) => {
-
-    return res.render('login');
-});
-
-// Ruta para cerrar sesión
-viewsRouter.get('/logout', (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            console.error('Error al cerrar sesión:', err);
-
-            return res.status(500).json({ error: 'Error interno del servidor' });
-        }
-        res.json({ message: 'Cierre de sesión exitoso' });
-})
-}
-);
-
 
 
 viewsRouter.get('/', async (req, res) => {

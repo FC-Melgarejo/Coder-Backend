@@ -4,46 +4,54 @@ const userModel = require('../dao/models/userModel');
 const sessionRouter = express.Router();
 
 sessionRouter.get('/', (req, res) => {
+    return res.json(req.session)
     if (!req.session.counter) {
-        req.session.counter = 1;
-        req.session.name = req.query.name;
+        req.session.counter = 1
+        req.session.name = req.query.name
 
-        return res.json(`Bienvenido ${req.session.name}`);
+        return res.json(`Bienvenido ${req.session.name}`)
     } else {
-        req.session.counter++;
+        req.session.counter++
 
-        return res.json(`${req.session.name} has visitado la página ${req.session.counter} veces`);
+        return res.json(`${req.session.name} has visitado la página ${req.session.counter} veces`)
     }
 });
 
-// Ruta para verificar la autenticación del usuario
-const authMiddleware = (req, res, next) => {
-    if (!req.session.username) {
-        return res.status(401).send('Necesitas iniciar sesión para ver esta página.');
+sessionRouter.post('/register', async (req, res) => {
+    const user = await userModel.create(req.body)
+
+    return res.redirect('/login')
+
+})
+
+sessionRouter.post('/login', async (req, res) => {
+    let user = await userModel.findOne({ email: req.body.email })
+    if (!user) {
+        return res.status(401).json({
+            error: 'El usuario no exixte en nuestro sistema'
+        })
     }
+    if (user.password !== req.body.password) {
+        return res.status(401).json({
+            error: 'El dato es incorrecto'
+        })
 
-    return next();
-};
-
-// Ruta para verificar si el usuario es administrador
-const adminMiddleware = (req, res, next) => {
-    if (!req.session.admin) {
-        return res.status(401).send('Necesitas ser administrador para ver esta página.');
     }
-
-    return next();
-};
-
-sessionRouter.get('/auth', authMiddleware, (req, res) => {
-    return res.send(`Si puedes ver esta ruta es porque estás logueado. Bienvenido ${req.session.username}`);
+    user = user.toObject()
+    delete user.password
+    req.session.user = user
+    return res.redirect('/products')
+});
+sessionRouter.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Error al cerrar sesión:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        return res.redirect('/login'); // Redirige a la vista de login después de cerrar sesión
+    });
 });
 
-sessionRouter.get('/admin', authMiddleware, adminMiddleware, (req, res) => {
-    return res.send(`Si puedes ver esta ruta es porque eres administrador. Bienvenido ${req.session.username}`);
-});
-
-// Otras rutas y lógica
-// ...
 
 module.exports = sessionRouter;
 

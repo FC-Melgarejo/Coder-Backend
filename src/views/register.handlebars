@@ -1,12 +1,13 @@
 <h2>Registro</h2>
-
 <form action="/api/sessions/register" method="POST">
-  Nombre <input type="text" name="name"><br><br>
-  Apellido <input type="text" name="lastname"><br><br>
-  Email <input type="text" name="email"><br><br>
-  Edad <input type="text" name="age"><br><br>
-  Password <input type="password" name="password"><br><br>
-
-  <input type="submit" value="Register">
+  <!-- Otros campos de registro (nombre, correo electrónico, contraseña, etc.) -->
+  <label for="admin">¿Eres administrador?</label>
+  <select id="admin" name="admin">
+    <option value="true">Sí</option>
+    <option value="false" selected>No</option>
+  </select>
+  <br><br>
+  <input type="submit" value="Registrarse">
 </form>
+
 

@@ -2,24 +2,12 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    password: {
-        type: String,
-        required: true,
-    },
-    isAdmin: {
-        type: Boolean,
-        default: false,
-    },
-});
+
+        name: String,
+        email: String,
+        password: String,
+        isAdmin: Boolean, // Campo para almacenar el estado de administrador
+    });
 
 // Método para encriptar la contraseña antes de guardarla en la base de datos
 userSchema.pre('save', function(next) {
