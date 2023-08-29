@@ -1,17 +1,31 @@
+{{#if hasError}}
+<p>{{error}}</p>
+{{/if}}
 
-    <div class="container">
-        <h2>Iniciar Sesión</h2>
-        <form action="/api/sessions/login" method="POST" class="login-form">
-            <div class="input-container">
-                <label for="email">Email</label>
-                <input type="text" id="email" name="email" placeholder="Tu email" required>
-            </div>
-            <div class="input-container">
-                <label for="password">Contraseña</label>
-                <input type="password" id="password" name="password" placeholder="Tu contraseña" required>
-            </div>
-            <button type="submit" class="login-button">Iniciar Sesión</button>
-        </form>
-    </div>
+<h3>Inicia sesion o<a href="/register">Registrate</a></h3>
+
+
+
+  <div class="container">
+    <h2>Iniciar Sesión</h2>
+    <form action="/api/sessions/login" method="POST" class="login-form">
+        <div class="input-container">
+            <label for="email">Email</label>
+            <input type="text" id="email" name="email" placeholder="Tu email" required>
+        </div>
+        <div class="input-container">
+            <label for="password">Contraseña</label>
+            <input type="password" id="password" name="password" placeholder="Tu contraseña" required>
+        </div>
+        <button type="submit" class="login-button">Iniciar Sesión</button>
+    </form>
+</div>
+
+<a href="/recovery-passwod">Olvide mi contraseña</a>
+
+<h3>Inicia sesión con</h3>
+
+<a href="/api/session/github">Entrar con Github</a>
+
 
 

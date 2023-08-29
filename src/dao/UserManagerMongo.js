@@ -1,27 +1,81 @@
-const UserModel = require('../dao/models/userModel');
+const userModel = require('./models/userModel');
 
-class UserManagerMongo {
-    async createUser(name, email, password) {
+const bcrypt = require('bcrypt')
+
+class UserManager {
+
+    constructor() {
+        this.model = userModel;
+    }
+
+    async createUser(data) {
         try {
-            const newUser = new UserModel({
-                name,
-                email,
-                password,
+            if (
+                !data.name ||
+                !data.email ||
+                !data.password
+            ) {
+                throw new Error('Todos los campos son obligatorios');
+            }
+
+            const exist = await this.model.findOne({ email: data.email });
+
+            if (exist) {
+                throw new Error(`Ya existe un usuario con el email ${data.email}`);
+            }
+
+            await this.model.create({
+                name: data.name,
+                email: data.email,
+                password: data.password,
+                isAdmin: data.isAdmin || false, // Agrega el campo isAdmin, puede ser true o false
             });
-            await newUser.save();
-            return newUser;
         } catch (error) {
             throw error;
         }
     }
-
-    async getUserByEmail(email) {
+    
+    async authenticateUser(email, password) {
         try {
-            return await UserModel.findOne({ email });
+            const user = await this.model.findOne({ email });
+    
+            if (!user) {
+                throw new Error(`El usuario con el email "${email}" no existe`);
+            }
+    
+            const passwordMatch = await bcrypt.compare(password, user.password);
+    
+            if (!passwordMatch) {
+                throw new Error('Los datos ingresados no son correctos');
+            }
+    
+            const authenticateUser = user.toObject();
+            delete authenticateUser.password;
+    
+            return authenticateUser;
+        } catch (error) {
+            throw error;
+        }
+    }
+    
+    
+
+    // Método para comprobar si un usuario es administrador
+    async isAdmin(email) {
+        try {
+            const user = await this.model.findOne({ email });
+
+            if (!user) {
+                throw new Error(`El usuario con el email "${email}" no existe`);
+            }
+
+            return user.isAdmin || false;
         } catch (error) {
             throw error;
         }
     }
 }
 
-module.exports = UserManagerMongo;
+module.exports = UserManager;
+
+

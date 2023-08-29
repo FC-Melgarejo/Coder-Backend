@@ -1,12 +1,19 @@
 const express = require('express');
 const session = require('express-session');
-const passport = require('passport');
 const MongoStore = require('connect-mongo');
 const handlebars = require('express-handlebars');
 const mongoose = require('mongoose');
 const { Server } = require('socket.io')
 const cookieParser = require('cookie-parser')
 const multer = require('multer');
+const passport = require('passport')
+const flash =require('connect-flash')
+
+const initializePassport = require('./config/passport.config');
+ 
+
+
+
 
 
 
@@ -27,7 +34,7 @@ app.use(session({
 
   store: MongoStore.create({
     mongoUrl:MONGODB_CONNECT,
-    ttl:90000
+    ttl:15
 
   }),
   secret: 'secretSession',
@@ -36,14 +43,21 @@ app.use(session({
 }));
 
 
+initializePassport(passport);
+
+app.use(passport.initialize());
+app.use(passport.session()); 
+
+
 
 
 // Middleware para el manejo de JSON y datos enviados por formularios
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(flash())
+// Pasa el objeto Passport como argumento
+
 
 // Configuración handlebars
 app.engine('handlebars', handlebars.engine())
@@ -75,7 +89,7 @@ const io = new Server(httpServer);
 
 // Implementación de enrutadores
 
-const sessionRouter = require('./routers/sessionRouter');
+const sessionRouter = require('./routers/sessionRouter'); // Asegúrate de que la ruta sea correcta
 const productsRouter = require('./routers/productsRouter');
 const cartsRouter = require('./routers/cartsRouter');
 const viewsRouter = require('./routers/viewsRouter');

@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
         name: String,
         email: String,
         password: String,
-        isAdmin: Boolean, // Campo para almacenar el estado de administrador
+        isAdmin: Boolean, 
     });
 
 // Método para encriptar la contraseña antes de guardarla en la base de datos

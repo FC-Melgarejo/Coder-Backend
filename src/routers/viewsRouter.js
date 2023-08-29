@@ -1,94 +1,46 @@
 const { Router } = require('express');
-const ProductManagerMongo = require('../dao/ProductManagerMongo');
-const CartsManagerMongo = require('../dao/CartsManagerMongo');
 const UserModel = require('../dao/models/userModel');
-const productManager = new ProductManagerMongo();
-const cartManager = new CartsManagerMongo();
+const ProductModel = require('../dao/models/productModel');
+
 const viewsRouter = new Router();
 
-// Ruta para registrar un nuevo usuario
-viewsRouter.post('/register', async (req, res) => {
-    try {
-        const { name, email, password, isAdmin } = req.body;
-        const newUser = new UserModel({
-            name,
-            email,
-            password,
-            isAdmin: isAdmin === 'true' // Convierte la cadena en un valor booleano
-        });
-        await newUser.save();
-        res.status(201).json({ message: 'Usuario registrado con éxito' });
-    } catch (error) {
-        console.error('Error al registrar usuario:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
-    }
-});
 
-// Middleware de sesión
 const sessionMiddleware = (req, res, next) => {
+    if (req.user) {
+        return res.redirect('/profile')
+    }
+
+    return next()
+}
+
+viewsRouter.get('/register', sessionMiddleware, (req, res) => {
+    return res.render('register')
+})
+
+viewsRouter.get('/login', sessionMiddleware, (req, res) => {
+    const error =req.flash('error')[0]
+    console.log({error});
+    return res.render('login',{error,hasError:error !== undefined})
+})
+
+viewsRouter.get('/recovery-password', sessionMiddleware, (req, res) => {
+    return res.render('recovery-password')
+})
+
+viewsRouter.get('/profile', (req, res, next) => {
     if (!req.session.user) {
-        return res.redirect('/login'); // Redirige si no hay sesión de usuario
+        return res.redirect('/login')
     }
-    return next();
-};
 
-// Middleware para verificar el rol de administrador
-const adminMiddleware = (req, res, next) => {
-    if (req.session.user && req.session.user.isAdmin) {
-        return next(); // El usuario es administrador
-    }
-    res.status(403).json({ error: 'Acceso denegado' });
-};
-
-// Ruta de perfil
-viewsRouter.get('/profile', sessionMiddleware, (req, res) => {
-    const user = req.session.user;
-    return res.render('profile', { user });
-});
-
-// Ruta de productos con mensaje de bienvenida
-viewsRouter.get('/products', sessionMiddleware, (req, res) => {
-    const user = req.session.user;
-    return res.render('products', { user });
-});
-
-// Ruta de administrador (accesible solo para administradores)
-viewsRouter.get('/admin', sessionMiddleware, adminMiddleware, (req, res) => {
-    const user = req.session.user;
-    return res.render('admin', { user });
-});
-
-// Ruta para cerrar sesión
-viewsRouter.get('/logout', (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            console.error('Error al cerrar sesión:', err);
-            return res.status(500).json({ error: 'Error interno del servidor' });
-        }
-        return res.redirect('/login'); // Redirige a la vista de login después de cerrar sesión
-    });
-});
-
-// Ruta para iniciar sesión
-viewsRouter.post('/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await UserModel.findOne({ email });
-
-        if (!user || !user.validPassword(password)) {
-            return res.status(401).json({ error: 'Credenciales incorrectas' });
-        }
-        req.session.user = user;
-        // Redirige a la vista de productos después de iniciar sesión
-        return res.redirect('/products');
-    } catch (error) {
-        console.error('Error al iniciar sesión:', error);
-        return res.status(500).json({ error: 'Error interno del servidor' });
-    }
-});
+    return next()
+}, (req, res) => {
+    const user = req.session.user
+    return res.render('profile', { user })
+})
 
 
-viewsRouter.get('/', async (req, res) => {
+
+viewsRouter.get('/home', async (req, res) => {
     try {
         const products = await productManager.getProducts()
         const limit = req.query.limit
