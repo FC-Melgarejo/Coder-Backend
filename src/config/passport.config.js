@@ -1,4 +1,5 @@
 const passport = require('passport')
+const GithubStrategy =require('passport-github2')
 const passportLocal = require('passport-local')
 const userModel = require('../dao/models/userModel')
 const { createHash, isValidPassword } = require('../utils/passwordHash')
@@ -6,6 +7,18 @@ const { createHash, isValidPassword } = require('../utils/passwordHash')
 const LocalStrategy = passportLocal.Strategy
 
 const initializePassport = () => {
+    passport.use('github',new GithubStrategy({
+        clientID:' Iv1.35f480523459289a',
+        clientSecret:'fe23b9a92bdf57fc37dbe19091d6f705e8de408a',
+        callbackURL:'http://localhost:8080/api/session/github-callback'
+    },(accessToken,refreshToken,profile,done)=>{
+        console.log({profile});
+        return done(null,{
+            name :'Fati'
+        })
+
+    }
+    ))
     passport.use('register', new LocalStrategy(
         { passReqToCallback: true, usernameField: 'email' },
         async (req, username, password, done) => {

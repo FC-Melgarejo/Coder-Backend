@@ -20,6 +20,14 @@ sessionRouter.get('/', (req, res) => {
   }
 })
 
+sessionRouter.get('/github',passport.authenticate('github',{scope:['user:email']}),async(req,res)=>{
+
+});
+
+sessionRouter.get('/github-callback',passport.authenticate('github',{failureRedirect:'/login'}),async(req,res)=>{
+  return res.json(req.user)
+})
+
 sessionRouter.post('/register', 
   passport.authenticate('register', { failureRedirect: '/failregister' }), 
   async (req, res) => {

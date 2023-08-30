@@ -7,11 +7,13 @@ const viewsRouter = new Router();
 
 const sessionMiddleware = (req, res, next) => {
     if (req.user) {
-        return res.redirect('/product')
+        return res.redirect('/profile')
     }
 
     return next()
 }
+
+viewsRouter.get('/github-login')
 
 viewsRouter.get('/register', sessionMiddleware, (req, res) => {
     return res.render('register')
