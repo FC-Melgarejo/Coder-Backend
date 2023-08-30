@@ -12,11 +12,6 @@ const flash =require('connect-flash')
 const initializePassport = require('./config/passport.config');
  
 
-
-
-
-
-
 const MONGODB_CONNECT = `mongodb+srv://melgarejofatimacarolina:8g3ZKFx4JtMWDIRS@cluster0.rhfgipr.mongodb.net/ecommerce?retryWrites=true&w=majority`
 mongoose.connect(MONGODB_CONNECT)
   .then(() => console.log('Conexión exitosa a la base de datos'))
@@ -34,7 +29,7 @@ app.use(session({
 
   store: MongoStore.create({
     mongoUrl:MONGODB_CONNECT,
-    ttl:15
+  
 
   }),
   secret: 'secretSession',

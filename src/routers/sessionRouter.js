@@ -1,41 +1,32 @@
+const express = require('express')
+const passport = require('passport')
 
+const UserModel = require('../dao/models/userModel')
+const { createHash, isValidPassword } = require('../utils/passwordHash')
 
-const express = require("express");
-const passport = require("passport");
-const userModel = require("../dao/models/userModel");
-const { createHash, isValidPassword } = require("../utils/passwordHash");
-const UserModel = require("../dao/models/userModel");
+const sessionRouter = express.Router()
 
-const sessionRouter = express.Router();
-
-// Ruta para verificar la sesión
-sessionRouter.get("/", (req, res) => {
+sessionRouter.get('/', (req, res) => {
+  return res.json(req.session)
   if (!req.session.counter) {
-    req.session.counter = 1;
-    req.session.name = req.query.name;
-    return res.json(`Bienvenido ${req.session.name}`);
+    req.session.counter = 1
+    req.session.name = req.query.name
+
+    return res.json(`Bienvenido ${req.session.name}`)
   } else {
-    req.session.counter++;
-    return res.json(
-      `${req.session.name} has visitado la página ${req.session.counter} veces`
-    );
+    req.session.counter++
+
+    return res.json(`${req.session.name} has visitado la página ${req.session.counter} veces`)
   }
-});
+})
 
 sessionRouter.post('/register', 
   passport.authenticate('register', { failureRedirect: '/failregister' }), 
   async (req, res) => {
-   const{email,password} =req.body;
-   if (!email || !password) return res.status(400).send({ error: "Missing email or password" });
-
-   let user ={
-  _name,
-  email,
-  rol,
-  password:createHash(password)
- 
-  }
-
+    /*const body = req.body
+    body.password = createHash(body.password)
+    console.log({ body })
+    const user = await UserModel.create(body)*/
 
     /*if (req.query.client === 'view') {
       return res.redirect('/login')
@@ -61,11 +52,20 @@ sessionRouter.get('/faillogin', (req, res) => {
 sessionRouter.post('/login', 
 passport.authenticate('login', { failureRedirect: '/faillogin' }), 
 async (req, res) => {
- const{email,password}=req.body;
- if(!email || !password) return res.status(400).send({status:'error',error:"datos incorrectos"})
-const user = await UserModel.findOne({email:email},{email:1,password:1})
-if(!user) return res.status(400).send({status:'error',error:'Usuario no encontrado'})
-if(!isValidPassword(user,password))return res.status(403).send({status:'error',error:'password incorrecto'})
+  // let user = await UserModel.findOne({ email: req.body.email })
+
+  // if (!user) {
+  //   return res.status(401).json({
+  //     error: 'El usuario no existe en el sistema'
+  //   })
+  // }
+
+  if (!isValidPassword(req.body.password, user.password)) {
+    return res.status(401).json({
+      error: 'Datos incorrectos'
+    })
+  }
+
   user = user.toObject()
 
   delete user.password
@@ -84,7 +84,7 @@ if(!isValidPassword(user,password))return res.status(403).send({status:'error',e
 
 sessionRouter.post('/recovery-password', async (req, res) => {
 
-  let user = await userModel.findOne({ email: req.body.email })
+  let user = await UserModel.findOne({ email: req.body.email })
 
   if (!user) {
     return res.status(401).json({
@@ -93,9 +93,9 @@ sessionRouter.post('/recovery-password', async (req, res) => {
   }
 
   const newPassword = createHash(req.body.password)
-  await userModel.updateOne({ email: user.email }, { password: newPassword })
+  await UserModel.updateOne({ email: user.email }, { password: newPassword })
 
-  return res.redirect('/login')
+  // return res.redirect('/login')
 
 })
 

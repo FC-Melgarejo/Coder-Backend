@@ -1,13 +1,13 @@
 const { Router } = require('express');
+const passport = require('passport');
 const UserModel = require('../dao/models/userModel');
 const ProductModel = require('../dao/models/productModel');
 
 const viewsRouter = new Router();
 
-
 const sessionMiddleware = (req, res, next) => {
     if (req.user) {
-        return res.redirect('/profile')
+        return res.redirect('/product')
     }
 
     return next()
@@ -18,10 +18,31 @@ viewsRouter.get('/register', sessionMiddleware, (req, res) => {
 })
 
 viewsRouter.get('/login', sessionMiddleware, (req, res) => {
-    const error =req.flash('error')[0]
-    console.log({error});
-    return res.render('login',{error,hasError:error !== undefined})
+    return res.render('login')
+});
+
+
+viewsRouter.get('/recovery-password', sessionMiddleware, (req, res) => {
+    return res.render('recovery-password')
 })
+
+viewsRouter.get('/profile', (req, res, next) => {
+    if (!req.session.user) {
+        return res.redirect('/login')
+    }
+
+    return next()
+}, (req, res) => {
+    const user = req.session.user
+    return res.render('profile', { user })
+})
+
+
+viewsRouter.get('/faillogin', (req, res) => {
+    // Renderiza una página de fallo de inicio de sesión o realiza acciones adicionales aquí
+    return res.render('faillogin');
+});
+
 
 viewsRouter.get('/recovery-password', sessionMiddleware, (req, res) => {
     return res.render('recovery-password')
@@ -171,10 +192,6 @@ viewsRouter.get('/error', (req, res) => {
     const errorMessage = req.query.message || 'Ha ocurrido un error';
     res.render('error', { title: 'Error', errorMessage: errorMessage });
 });
-
-
-
-
 
 module.exports = viewsRouter;
 

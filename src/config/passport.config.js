@@ -18,9 +18,8 @@ const initializePassport = () => {
                 }
 
                 const body = req.body
-                const hashedPassword = createHash(body.password)
-                console.log('Hashed Password:', hashedPassword)
-                body.password = hashedPassword
+                body.password = createHash(body.password)
+                console.log({ body })
 
                 const newUser = await userModel.create(body)
 
@@ -35,10 +34,12 @@ const initializePassport = () => {
         { usernameField: 'email' },
         async (email, password, done) => {
             try {
+                console.log(email,password);
                 let user = await userModel.findOne({ email: email })
+                console.log(user);
 
                 if (!user) {
-                    console.log('El usuario no existe en la base de datos')
+                    console.log('El usuario no existe en el sistema')
                     return done(null, false)
                 }
 
@@ -65,11 +66,9 @@ const initializePassport = () => {
 
     passport.deserializeUser(async (id, done) => {
         console.log('deserializeUser')
-        const user = await userModel.findOne(id)
+        const user = await userModel.findOne({_id:id})
         done(null, user)
     })
 }
 
 module.exports = initializePassport
-
-
