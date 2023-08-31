@@ -2,35 +2,39 @@ const express = require('express')
 const passport = require('passport')
 
 const UserModel = require('../dao/models/userModel')
-const { createHash, isValidPassword } = require('../utils/passwordHash')
+// const { createHash, isValidPassword } = require('../utils/passwordHash')
+
 
 const sessionRouter = express.Router()
 
-sessionRouter.get('/', (req, res) => {
-  return res.json(req.session)
-  if (!req.session.counter) {
-    req.session.counter = 1
-    req.session.name = req.query.name
+// sessionRouter.get('/', (req, res) => {
+//   return res.json(req.session)
+//   if (!req.session.counter) {
+//     req.session.counter = 1
+//     req.session.name = req.query.name
 
-    return res.json(`Bienvenido ${req.session.name}`)
-  } else {
-    req.session.counter++
+//     return res.json(`Bienvenido ${req.session.name}`)
+//   } else {
+//     req.session.counter++
 
-    return res.json(`${req.session.name} has visitado la página ${req.session.counter} veces`)
-  }
+//     return res.json(`${req.session.name} has visitado la página ${req.session.counter} veces`)
+//   }
+// })
+
+sessionRouter.get('/github', passport.authenticate('github', { scope: ['user:email'] }), async (req, res) => {
+
 })
 
-sessionRouter.get('/github',passport.authenticate('github',{scope:['user:email']}),async(req,res)=>{
-
-});
-
-sessionRouter.get('/github-callback',passport.authenticate('github',{failureRedirect:'/login'}),async(req,res)=>{
-  return res.json(req.user)
+sessionRouter.get('/github-callback', passport.authenticate('github', { failureRedirect: '/login'}), async (req, res) => {
+  return res.json({
+    session:req.session,
+    user:req.user
+  })
 })
 
-sessionRouter.post('/register', 
-  passport.authenticate('register', { failureRedirect: '/failregister' }), 
-  async (req, res) => {
+// sessionRouter.post('/register', 
+//   passport.authenticate('register', { failureRedirect: '/failregister' }), 
+//   async (req, res) => {
     /*const body = req.body
     body.password = createHash(body.password)
     console.log({ body })
@@ -42,69 +46,78 @@ sessionRouter.post('/register',
 
     //return res.redirect('/login')
 
-    return res.status(201).json(req.user)
-  })
+    //  return res.send.status(201).json(req.user)
+  // })
 
-sessionRouter.get('/failregister', (req, res) => {
-  return res.json({
-    error: 'Error al registrarse'
-  })
-})
+// sessionRouter.get('/failregister', (req, res) => {
+//   return res.json({
+//     error: 'Error al registrarse'
+//   })
+// })
 
-sessionRouter.get('/faillogin', (req, res) => {
-  return res.json({
-    error: 'Error al iniciar sesión'
-  })
-})
+// sessionRouter.get('/faillogin', (req, res) => {
+//   return res.json({
+//     error: 'Error al iniciar sesión'
+//   })
+// })
 
-sessionRouter.post('/login', 
-passport.authenticate('login', { failureRedirect: '/faillogin' }), 
-async (req, res) => {
+// sessionRouter.post('/login', 
+// passport.authenticate('login', { failureRedirect: '/faillogin' }), 
+// async (req, res) => {
   // let user = await UserModel.findOne({ email: req.body.email })
 
   // if (!user) {
   //   return res.status(401).json({
   //     error: 'El usuario no existe en el sistema'
   //   })
-  // }
+//   // }
 
-  if (!isValidPassword(req.body.password, user.password)) {
-    return res.status(401).json({
-      error: 'Datos incorrectos'
-    })
-  }
+//   if (!isValidPassword(req.body.password, user.password)) {
+//     return res.status(401).json({
+//       error: 'Datos incorrectos'
+//     })
+//   }
 
-  user = user.toObject()
+//   user = user.toObject()
 
-  delete user.password
+//   delete user.password
 
-  req.session.user = user
+//   req.session.user = user
 
-  //return res.json(user)
+//   //return res.json(user)
 
-  console.log({
-    user: req.user,
-    session: req.session
-  })
+//   console.log({
+//     user: req.user,
+//     session: req.session
+//   })
   
-  return res.json(req.user)
-})
+//   return res.json(req.user)
+// // })
 
-sessionRouter.post('/recovery-password', async (req, res) => {
+// sessionRouter.post('/recovery-password', async (req, res) => {
+//   try {
+//     let user = await UserModel.findOne({ email: req.body.email })
+//     if (!user) {
+//       return res.status(401).json({
+//         error: 'El usuario no existe en el sistema'
+//       })
+//     }
 
-  let user = await UserModel.findOne({ email: req.body.email })
+//     const newPassword = createHash(req.body.password)
+//     await UserModel.updateOne({ email: user.email }, { password: newPassword })
 
-  if (!user) {
-    return res.status(401).json({
-      error: 'El usuario no existe en el sistema'
-    })
-  }
+//     // Resto del código de manejo de errores, respuestas, etc.
+//   } catch (error) {
+//      return (error)
+//   }
+// })
 
-  const newPassword = createHash(req.body.password)
-  await UserModel.updateOne({ email: user.email }, { password: newPassword })
 
-  // return res.redirect('/login')
+//   const newPassword = createHash(req.body.password)
+//   await UserModel.updateOne({ email: user.email }, { password: newPassword })
 
-})
+//   // return res.redirect('/login')
+
+// // })
 
 module.exports = sessionRouter

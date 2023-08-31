@@ -5,61 +5,72 @@ const ProductModel = require('../dao/models/productModel');
 
 const viewsRouter = new Router();
 
-const sessionMiddleware = (req, res, next) => {
-    if (req.user) {
-        return res.redirect('/profile')
-    }
-
-    return next()
-}
-
-viewsRouter.get('/github-login')
-
-viewsRouter.get('/register', sessionMiddleware, (req, res) => {
-    return res.render('register')
-})
-
-viewsRouter.get('/login', sessionMiddleware, (req, res) => {
+viewsRouter.get('/login', (req, res) => {
     return res.render('login')
-});
+  })
+  
+  viewsRouter.get('/profile', (req, res) => {
+    return res.json({
+        session:req.session,
+        user:req.user
+    })
+  })
+
+// const sessionMiddleware = (req, res, next) => {
+//     if (req.user) {
+//         return res.redirect('/profile')
+//     }
+
+//     return next()
+// }
+
+// viewsRouter.get('/github-login')
+
+// viewsRouter.get('/register', sessionMiddleware, (req, res) => {
+//     return res.render('register')
+// })
+
+// viewsRouter.get('/login', sessionMiddleware, (req, res) => {
+//     return res.render('login')
+// });
 
 
-viewsRouter.get('/recovery-password', sessionMiddleware, (req, res) => {
-    return res.render('recovery-password')
-})
+// viewsRouter.get('/recovery-password', sessionMiddleware, (req, res) => {
+//     return res.render('recovery-password')
+// })
 
-viewsRouter.get('/profile', (req, res, next) => {
-    if (!req.session.user) {
-        return res.redirect('/login')
-    }
+// viewsRouter.get('/profile', (req, res, next) => {
+//     if (!req.session.user) {
+//         return res.redirect('/login')
+//     }
 
-    return next()
-}, (req, res) => {
-    const user = req.session.user
-    return res.render('profile', { user })
-})
-
-
-viewsRouter.get('/faillogin', (req, res) => {
-    // Renderiza una página de fallo de inicio de sesión o realiza acciones adicionales aquí
-    return res.render('faillogin');
-});
+//     return next()
+// }, (req, res) => {
+//     const user = req.session.user
+//     return res.render('profile', { user })
+// })
 
 
-viewsRouter.get('/recovery-password', sessionMiddleware, (req, res) => {
-    return res.render('recovery-password')
-})
+// viewsRouter.get('/faillogin', (req, res) => {
+//     // Renderiza una página de fallo de inicio de sesión o realiza acciones adicionales aquí
+//     return res.render('faillogin');
+// });
 
-viewsRouter.get('/profile', (req, res, next) => {
-    if (!req.session.user) {
-        return res.redirect('/login')
-    }
 
-    return next()
-}, (req, res) => {
-    const user = req.session.user
-    return res.render('profile', { user })
-})
+// viewsRouter.get('/recovery-password', sessionMiddleware, (req, res) => {
+//     return res.render('recovery-password')
+// })
+
+// viewsRouter.get('/profile', (req, res, next) => {
+//     if (!req.session.user) {
+//         return res.redirect('/login')
+//     }
+
+//     return next()
+// }, (req, res) => {
+//     const user = req.session.user
+//     return res.render('profile', { user })
+// })
 
 
 

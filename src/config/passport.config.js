@@ -1,5 +1,5 @@
 const passport = require('passport')
-const GithubStrategy =require('passport-github2')
+const GitHubStrategy = require('passport-github2')
 const passportLocal = require('passport-local')
 const userModel = require('../dao/models/userModel')
 const { createHash, isValidPassword } = require('../utils/passwordHash')
@@ -7,16 +7,30 @@ const { createHash, isValidPassword } = require('../utils/passwordHash')
 const LocalStrategy = passportLocal.Strategy
 
 const initializePassport = () => {
-    passport.use('github',new GithubStrategy({
-        clientID:' Iv1.35f480523459289a',
-        clientSecret:'fe23b9a92bdf57fc37dbe19091d6f705e8de408a',
-        callbackURL:'http://localhost:8080/api/session/github-callback'
-    },(accessToken,refreshToken,profile,done)=>{
-        console.log({profile});
-        return done(null,{
-            name :'Fati'
-        })
+    passport.use('github', new GitHubStrategy({
+        clientID: 'Iv1.35f480523459289a',
+        clientSecret: 'fe23b9a92bdf57fc37dbe19091d6f705e8de408a',
+        callbackURL: 'http://localhost:8080/api/sessions/github-callback'
+    }, async (accessToken, refreshToken, profile, done) => {
+        try{
+            
+        const user = await userModel.findOne({ email: profile._json.email })
 
+            if (user) {
+                console.log('Usuario ya existe')
+                return done(null, user)
+            }
+    
+            const newUser = await userModel.create({
+                username:profile._json.login,
+                email:profile._json.email
+            })
+            return done(null,newUser)
+
+        }catch(e){
+            return done(e)
+
+        }
     }
     ))
     passport.use('register', new LocalStrategy(
@@ -47,7 +61,7 @@ const initializePassport = () => {
         { usernameField: 'email' },
         async (email, password, done) => {
             try {
-                console.log(email,password);
+                console.log(email, password);
                 let user = await userModel.findOne({ email: email })
                 console.log(user);
 
@@ -73,15 +87,15 @@ const initializePassport = () => {
     ))
 
     passport.serializeUser((user, done) => {
-        console.log('serializeUser')
+        console.log({user})
+        console.log('serializeUser');
         done(null, user._id)
     })
 
     passport.deserializeUser(async (id, done) => {
         console.log('deserializeUser')
-        const user = await userModel.findOne({_id:id})
+        const user = await userModel.findOne({ _id: id })
         done(null, user)
     })
 }
-
 module.exports = initializePassport
