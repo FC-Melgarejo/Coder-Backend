@@ -1,27 +1,32 @@
-const { Router } = require('express')
-const ProductManagerMongo = require('../dao/ProductManagerMongo')
-const uploader = require('../utils/uploader')
-const productsRouter = new Router()
-const productManager = new ProductManagerMongo();
+const { Server } = require("socket.io");
+const io = require("../server"); 
+const { Router } = require('express');
+
+const ProductManagerMongo = require('../dao/ProductManagerMongo');
+// En tus rutas donde creas una instancia de ProductManagerMongo
+const productManager = new ProductManagerMongo(io);
 
 
+const productsRouter = new Router();
 
+
+// Ruta para obtener todos los productos
 productsRouter.get('/', async (req, res) => {
-    const limit = parseInt(req.query.limit) || 10;
-    const page = parseInt(req.query.page) || 1;
-    const sort = req.query.sort || null;
-    const query = req.query.query || '';
-    const category = req.query.category || '';
-    const availability = req.query.availability || '';
-
-    const filter = {};
-    if (category) filter.category = category;
-    if (availability) filter.availability = availability;
-    if (query) {
-        filter.$or = [{ category }, { availability }];
-    }
-
     try {
+        const limit = parseInt(req.query.limit) || 10;
+        const page = parseInt(req.query.page) || 1;
+        const sort = req.query.sort || null;
+        const query = req.query.query || '';
+        const category = req.query.category || '';
+        const availability = req.query.availability || '';
+
+        const filter = {};
+        if (category) filter.category = category;
+        if (availability) filter.availability = availability;
+        if (query) {
+            filter.$or = [{ category }, { availability }];
+        }
+
         const products = await productManager.getProducts(filter, sort, limit, page);
 
         const totalProducts = await productManager.countProducts(filter);
@@ -50,96 +55,73 @@ productsRouter.get('/', async (req, res) => {
             page,
             hasPrevPage: prevPage !== null,
             hasNextPage: nextPage !== null,
-            prevLink: paginationLinks('/products', { limit, page: prevPage, sort, query, category, availability }),
-            nextLink: paginationLinks('/products', { limit, page: nextPage, sort, query, category, availability }),
+            prevLink: paginationLinks('/products', {
+                limit,
+                page: prevPage,
+                sort,
+                query,
+                category,
+                availability,
+            }),
+            nextLink: paginationLinks('/products', {
+                limit,
+                page: nextPage,
+                sort,
+                query,
+                category,
+                availability,
+            }),
         };
 
         res.status(200).json(response);
     } catch (error) {
-        res.status(500).json({ status: 'error', message: 'Internal server error' });
+        console.error('Error al obtener los productos:', error);
+        res.status(500).json({ error: 'Error al obtener los productos' });
     }
 });
-
-productsRouter.get('/', async (req, res) => {
-    try { const products = await Product.find();
-        res. json(products);
-    } catch (error) {
-    res. status(500).json({ error: 'Error al obtener los productos', message: error.message });
-    }
-});
-
-productsRouter.get('/:pid', async (req, res) => {
-    const pid = req.params.pid;
-    try {
-        const product = await productManager.getProductById(pid);
-        return res.status(200).json({ status: 'success', payload: product });
-    } catch (error) {
-        const commonErrorMessage = 'Error al obtener el producto';
-        if (error.message === 'Producto no encontrado') {
-            return res.status(404).json({ error: commonErrorMessage, message: `El producto con el id ${pid} no se encuentra` });
-        }
-        return res.status(500).json({ error: commonErrorMessage, message: error.message });
-    }
-});
-
-productsRouter.post('/', uploader.array('thumbnails', 5), async (req, res) => {
-    const newProduct = req.body;
-    const thumbnails = req.files ? req.files.map(file => file.path) : [];
-    try {
-        await productManager.addProduct({ ...newProduct, thumbnails });
-        return res.status(201).json({ status: 'success', message: 'Producto agregado exitosamente' });
-    } catch (error) {
-        return res.status(500).json({ error: 'Error al agregar el producto', message: error.message });
-    }
-});
+// Ruta para agregar un nuevo producto
 productsRouter.post('/', async (req, res) => {
     try {
-      // Extrae los datos del formulario enviado por el usuario
-      const formData = req.body; // Ajusta esto según la estructura de tu formulario
-  
-      // Agrega el producto a la base de datos utilizando el productManager
-      await productManager.addProduct(formData);
-  // Redirige a la vista de "All Products" o a otra ubicación
-      res.redirect('/products');
+        const newProductData = req.body;
+        await productManager.addProduct(newProductData);
+        res.status(201).json({ status: 'success', message: 'Producto agregado exitosamente' });
     } catch (error) {
-      // Manejo de errores
-      // ...
+        console.error('Error al agregar el producto:', error);
+        res.status(500).json({ error: 'Error al agregar el producto' });
     }
-  });
+});
 
+// Ruta para actualizar un producto existente por su ID
 productsRouter.put('/:pid', async (req, res) => {
     const pid = req.params.pid;
-    const updatedProduct = req.body;
+    const updatedProductData = req.body;
 
     try {
-        await productManager.updateProduct(pid, updatedProduct);
-        return res.status(200).json({ status: 'success', message: 'Producto actualizado exitosamente' });
+        await productManager.updateProduct(pid, updatedProductData);
+        res.status(200).json({ status: 'success', message: 'Producto actualizado exitosamente' });
     } catch (error) {
-        const commonErrorMessage = 'Error al actualizar el producto';
-        if (error.message === 'Producto no encontrado') {
-            return res.status(404).json({ error: commonErrorMessage, message: `El producto con el id ${pid} no se encuentra` });
-        }
-        if (error.code === 11000) {
-            return res.status(404).json({ error: commonErrorMessage, message: `El código ${updatedProduct.code} ya se encuentra en uso` });
-        }
-        return res.status(500).json({ error: commonErrorMessage, message: error.message });
+        console.error('Error al actualizar el producto:', error);
+        res.status(500).json({ error: 'Error al actualizar el producto' });
     }
 });
 
+// Ruta para eliminar un producto por su ID
 productsRouter.delete('/:pid', async (req, res) => {
     const pid = req.params.pid;
+
     try {
         await productManager.deleteProduct(pid);
-        return res.status(200).json({ status: 'success', message: 'Producto borrado exitosamente' });
+        res.status(200).json({ status: 'success', message: 'Producto eliminado exitosamente' });
     } catch (error) {
-        const commonErrorMessage = 'Error al borrar el producto';
-        if (error.message === 'Producto no encontrado') {
-            return res.status(404).json({ error: commonErrorMessage, message: `El producto con el id ${pid} no se encuentra` });
-        }
-        return res.status(500).json({ error: commonErrorMessage, message: error.message });
+        console.error('Error al eliminar el producto:', error);
+        res.status(500).json({ error: 'Error al eliminar el producto' });
     }
 });
 
+
+
+
 module.exports = productsRouter;
+
 
 

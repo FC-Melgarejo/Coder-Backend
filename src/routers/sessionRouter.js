@@ -1,123 +1,123 @@
-const express = require('express')
-const passport = require('passport')
+const express = require('express');
+const passport = require('passport');
+const userModel = require('../dao/models/userModel');
+const { generateToken } = require('../utils/jwt');
+const { createHash, isValidPassword } = require('../utils/passwordHash');
 
-const UserModel = require('../dao/models/userModel')
-// const { createHash, isValidPassword } = require('../utils/passwordHash')
-
-
-const sessionRouter = express.Router()
-
-// sessionRouter.get('/', (req, res) => {
-//   return res.json(req.session)
-//   if (!req.session.counter) {
-//     req.session.counter = 1
-//     req.session.name = req.query.name
-
-//     return res.json(`Bienvenido ${req.session.name}`)
-//   } else {
-//     req.session.counter++
-
-//     return res.json(`${req.session.name} has visitado la página ${req.session.counter} veces`)
-//   }
-// })
+const sessionRouter = express.Router();
 
 sessionRouter.get('/github', passport.authenticate('github', { scope: ['user:email'] }), async (req, res) => {
 
 })
 
 sessionRouter.get('/github-callback', passport.authenticate('github', { failureRedirect: '/login'}), async (req, res) => {
-  return res.json({
-    session:req.session,
-    user:req.user
-  })
+  return res.json(req.user)
 })
 
-// sessionRouter.post('/register', 
-//   passport.authenticate('register', { failureRedirect: '/failregister' }), 
-//   async (req, res) => {
-    /*const body = req.body
-    body.password = createHash(body.password)
-    console.log({ body })
-    const user = await UserModel.create(body)*/
+sessionRouter.post('/register', async (req, res) => {
+  try {
+    const { name, apellido, email, password } = req.body;
+    if (!name || !apellido || !email || !password) {
+      console.log('req.body');
+      return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+    }
 
-    /*if (req.query.client === 'view') {
-      return res.redirect('/login')
-    }*/
+    const user = await userModel.findOne({ email });
 
-    //return res.redirect('/login')
+    if (user) {
+      console.log('user');
+      return res.status(401).json({ error: 'El usuario ya existe' });
+    }
 
-    //  return res.send.status(201).json(req.user)
-  // })
+    const hashedPassword = createHash(password);
 
-// sessionRouter.get('/failregister', (req, res) => {
-//   return res.json({
-//     error: 'Error al registrarse'
-//   })
-// })
+    const newUser = {
+      name,
+      apellido,
+      email,
+      password: hashedPassword,
+      username: email,
+      isAdmin: req.body.isAdmin || false,
+    };
 
-// sessionRouter.get('/faillogin', (req, res) => {
-//   return res.json({
-//     error: 'Error al iniciar sesión'
-//   })
-// })
+    const token = generateToken({
+      name,
+      email,
+    });
 
-// sessionRouter.post('/login', 
-// passport.authenticate('login', { failureRedirect: '/faillogin' }), 
-// async (req, res) => {
-  // let user = await UserModel.findOne({ email: req.body.email })
+    await userModel.create(newUser);
 
-  // if (!user) {
-  //   return res.status(401).json({
-  //     error: 'El usuario no existe en el sistema'
-  //   })
-//   // }
+    return res.redirect('/login');
+  } catch (error) {
+    console.error('Error al registrar usuario:', error);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
 
-//   if (!isValidPassword(req.body.password, user.password)) {
-//     return res.status(401).json({
-//       error: 'Datos incorrectos'
-//     })
-//   }
+sessionRouter.get('/failregister', (req, res) => {
+  return res.json({
+    error: 'Error al registrarse'
+  });
+});
 
-//   user = user.toObject()
+sessionRouter.get('/faillogin', (req, res) => {
+  return res.json({
+    error: 'Error al iniciar sesión'
+  });
+});
 
-//   delete user.password
+sessionRouter.post('/login', 
+  passport.authenticate('login', { failureRedirect: '/faillogin' }), 
+  async (req, res) => {
+    try {
+      let user = await userModel.findOne({ email: req.body.email });
 
-//   req.session.user = user
+      if (!user) {
+        console.log({user});
+        return res.status(401).json({
+          error: 'El usuario no existe en el sistema'
+        });
+      }
 
-//   //return res.json(user)
+      if (!isValidPassword(req.body.password, user.password)) {
+        return res.status(401).json({
+          error: 'Datos incorrectos'
+        });
+      }
 
-//   console.log({
-//     user: req.user,
-//     session: req.session
-//   })
-  
-//   return res.json(req.user)
-// // })
+      user = user.toObject();
 
-// sessionRouter.post('/recovery-password', async (req, res) => {
-//   try {
-//     let user = await UserModel.findOne({ email: req.body.email })
-//     if (!user) {
-//       return res.status(401).json({
-//         error: 'El usuario no existe en el sistema'
-//       })
-//     }
+      delete user.password;
 
-//     const newPassword = createHash(req.body.password)
-//     await UserModel.updateOne({ email: user.email }, { password: newPassword })
+      req.session.user = user;
 
-//     // Resto del código de manejo de errores, respuestas, etc.
-//   } catch (error) {
-//      return (error)
-//   }
-// })
+      if (user.isAdmin) {
+        return res.redirect('/products');
+      } else {
+        return res.redirect('/profile');
+      }
+    } catch (error) {
+      console.error('Error al iniciar sesión:', error);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
 
+sessionRouter.post('/recovery-password', async (req, res) => {
 
-//   const newPassword = createHash(req.body.password)
-//   await UserModel.updateOne({ email: user.email }, { password: newPassword })
+  let user = await userModel.findOne({ email: req.body.email })
 
-//   // return res.redirect('/login')
+  if (!user) {
+    return res.status(401).json({
+      error: 'El usuario no existe en el sistema'
+    })
+  }
 
-// // })
+  const newPassword = createHash(req.body.password)
+  await userModel.updateOne({ email: user.email }, { password: newPassword })
 
-module.exports = sessionRouter
+  return res.redirect('/login')
+
+})
+
+module.exports = sessionRouter;
+

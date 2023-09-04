@@ -1,7 +1,7 @@
 <h1>All Products</h1>
 <h2>Bienvenido, {{user.name}}!</h2>
 <p>Rol: {{user.role}}</p>
-<a href="/logout" class="logout-button">Cerrar Sesión</a>
+
 
   {{#if noProducts}}
     <p>No hay productos disponibles</p>
@@ -44,7 +44,7 @@
     </form>
   {{/if}}
 
-
+<a href="/logout" class="logout-button">Cerrar Sesión</a>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/index.js"></script>

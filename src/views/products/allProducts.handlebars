@@ -7,10 +7,11 @@
                 <p>Description: {{description}}</p>
                 <p>Price: {{price}}</p>
                 <p>Category: {{category}}</p>
-                <form action="/cart/{{cartId}}/add" method="post">
-                    <input type="hidden" name="productId" value="{{_id}}">
-                    <button type="submit">Add to Cart</button>
-                </form>
+                <form action="/cart/add" method="post">
+    <input type="hidden" name="productId" value="64e3c8e88233533c16f46dc5">
+    <button type="submit">Add to Cart</button>
+</form>
+
                  <td><a href="/products/{{this._id}}">View Details</a></td>
 
             </li>
