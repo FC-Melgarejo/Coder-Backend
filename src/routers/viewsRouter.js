@@ -11,7 +11,7 @@ const productManager = new ProductManagerMongo(io); // Asegúrate de que 'io' es
 function sessionMiddleware(req, res, next) {
     if (req.session.user) {
         console.log('req.session.user');
-        return res.redirect('/profile');
+        return res.redirect('/login');
     }
     return next();
 }
@@ -27,10 +27,15 @@ viewsRouter.get('/register', sessionMiddleware, (req, res) => {
     return res.render('register');
 });
 
-viewsRouter.get('/login', (req, res) => {
-    console.log('login');
-    return res.render('login');
-});
+viewsRouter.get('/login', sessionMiddleware, (req, res) => {
+     console.log(req.flash('error'))
+    const error = req.flash('error')[0]
+    console.log({ error })
+    return res.render('login', { 
+      error,
+      hasError: error !== undefined
+    })
+  });
 
 viewsRouter.get('/api/sessions/recovery-password', sessionMiddleware, (req, res) => {
     return res.render('recovery-password');

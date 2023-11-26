@@ -1,12 +1,13 @@
 const express = require('express');
 const session = require('express-session');
+const path = require('path');
 const MongoStore = require('connect-mongo');
 const handlebars = require('express-handlebars');
 const mongoose = require('mongoose');
 const { Server } = require('socket.io');
 const http = require('http'); // Agrega esta línea
 const ioInit = require('./utils/io'); // Cambia el nombre del archivo
-
+const nodemailer =require('nodemailer')
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const passport = require('passport');
@@ -64,20 +65,72 @@ const storage = multer.diskStorage({
 const uploader = multer({ storage: storage });
 
 app.use(express.static(__dirname + '/public'));
+console.log(__dirname + '/public/img/ecommerce'); // Imprime la ruta de destino
+
 app.set('views', __dirname + '/views');
 
 const httpServer = http.createServer(app);
 const io = ioInit(httpServer); // Inicializa Socket.io con el servidor HTTP
 
 const sessionRouter = require('./routers/sessionRouter');
+const usersRouter = require('./routers/userRouter');
 const productsRouter = require('./routers/productsRouter');
 const cartsRouter = require('./routers/cartsRouter');
 const viewsRouter = require('./routers/viewsRouter');
-
+   
+app.use('/', viewsRouter);
 app.use('/api/sessions', sessionRouter);
 app.use('/api/products', productsRouter);
+app.use('/users', usersRouter);
 app.use('/api/carts', cartsRouter);
-app.use('/', viewsRouter);
+
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  port: 587,
+  auth: {
+    user: 'faticarolinamelgarejo2@gmail.com',
+    pass: 'ieiu whya abik gicc',
+  },
+});
+console.log(path.join(__dirname, '..', 'public', 'img', 'ecommerce', 'ecommerce.png'));
+
+// ...
+
+app.get('/mail', async (req, res) => {
+  try {
+    // Modificamos la construcción de la ruta aquí
+    let result = await transporter.sendMail({
+      from: 'Test Coder <faticarolinamelgarejo2@gmail.com>',
+      to: 'faticarolinamelgarejo2@gmail.com',
+      subject: 'Test',
+      html: `
+        <div>
+          <h1>Bienvenido al mejor Ecommerce!!</h1>
+          <div>
+            <h1>Aqui con una imagen!!</h1>
+            <img src='cid:ecommerce' alt='Ecommerce Image' />
+          </div>
+        </div>
+      `,
+      attachments: [{
+        filename: 'ecommerce.png',
+        // Modificamos la construcción de la ruta aquí
+        path: path.join(process.cwd(), 'public', 'img', 'ecommerce.png'),
+
+        cid: 'ecommerce',
+      }],
+    });
+
+    res.send({ status: 'success', result: 'mail enviado' });
+  } catch (error) {
+    console.error('Error al enviar el correo:', error);
+    res.status(500).send({ status: 'error', error: 'Error al enviar el correo' });
+  }
+});
+
+// ...
+
 
 app.get('/healthCheck', (req, res) => {
   res.json({

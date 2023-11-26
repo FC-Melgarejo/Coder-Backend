@@ -12,6 +12,10 @@ sessionRouter.get('/github', passport.authenticate('github', { scope: ['user:ema
 
 sessionRouter.get('/github-callback', passport.authenticate('github', { failureRedirect: '/login'}), async (req, res) => {
   return res.json(req.user)
+});
+
+sessionRouter.post('/register',passport.authenticate('register',{failureRedirect:'/failregister'}),async(req,res)=>{
+  res.send({status:'success',message:'User registred'})
 })
 
 sessionRouter.post('/register', async (req, res) => {
