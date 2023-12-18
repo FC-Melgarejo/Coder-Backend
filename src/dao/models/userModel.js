@@ -1,11 +1,12 @@
-const { Schema, model } = require('mongoose');
-
+const mongoose = require('mongoose');
+const { Schema, model } = mongoose;
 const userSchema = Schema({
   name: String,
   lastname: String,
   username: {
     type: String,
-    unique: true
+    unique: true,
+    require:true
   },
   email: {
     type: String,
@@ -23,9 +24,14 @@ const userSchema = Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  cart: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'carts'
   }
 });
 
-module.exports = model('users', userSchema);
+const UserModel = mongoose.model('User', userSchema);
+module.exports = UserModel; 
 
 

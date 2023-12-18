@@ -17,7 +17,8 @@ class UserManager {
                 throw new Error('Todos los campos son obligatorios');
             }
 
-            const hashedPassword = await createHash(data.password); // Cifra la contraseña
+            const hashedPassword = await bcrypt.hash(data.password, 10); // 10 es el número de rondas de sal
+ // Cifra la contraseña
             const exist = await this.model.findOne({ email: data.email });
 
             if (exist) {

@@ -5,15 +5,23 @@ const { generateToken } = require('../utils/jwt');
 
 class UserService {
   constructor() {
+    console.log("UserService initialized");
+
     this.userDao = new UserDao();
   }
 
   async registerUser(userData) {
-    const existingUser = await this.userDao.findByEmail(userData.email);
+    console.log('Calling registerUser with data:', userData);
+    
+  console.log('this.userDao.createUser is a function:', typeof this.userDao.createUser === 'function');
+  const existingUser = await this.userDao.getUserByEmail(userData.email);
+
+    console.log('Existing User:', existingUser);
+  
     if (existingUser) {
       throw new Error('El usuario ya existe');
     }
-
+  
     const hashedPassword = createHash(userData.password);
     const newUser = {
       ...userData,
@@ -21,12 +29,15 @@ class UserService {
       username: userData.email,
       isAdmin: userData.isAdmin || false,
     };
-
-    await this.userDao.createUser(newUser);
+  
+    // Corrige el nombre del método aquí
+    await this.userDao.saveUser(newUser);
   }
+  
+  
 
   async loginUser(email, password) {
-    const user = await this.userDao.findByEmail(email);
+    const user = await this.userDao.getUserById(email);
 
     if (!user || !isValidPassword(password, user.password)) {
       throw new Error('Credenciales incorrectas');
@@ -60,7 +71,16 @@ class UserService {
   async deleteUser(userId) {
     return this.userDao.deleteUser(userId);
   }
+  async getUserByEmail(email) {
+    const user = await this.userDao.getUserByEmail(email);
+    return user;
+  }
+  
+  
+  
+
 }
+
 
 module.exports = UserService;
 

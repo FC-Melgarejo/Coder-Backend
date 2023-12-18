@@ -25,6 +25,16 @@ async function getUserById(req, res) {
   }
 }
 
+async function createUser(req, res) {
+  const userData = req.body;
+  try {
+    const createdUser = await userService.createUser(userData);
+    res.status(201).json(createdUser);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 async function updateUser(req, res) {
   const { userId } = req.params;
   const userData = req.body;
@@ -42,6 +52,7 @@ async function updateUser(req, res) {
 module.exports = {
   getUsers,
   getUserById,
+  createUser,
   updateUser,
-  // Puedes agregar otras funciones según sea necesario
 };
+

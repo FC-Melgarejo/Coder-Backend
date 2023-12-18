@@ -1,18 +1,26 @@
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
+const cors =require('cors')
 const MongoStore = require('connect-mongo');
 const handlebars = require('express-handlebars');
 const mongoose = require('mongoose');
 const { Server } = require('socket.io');
-const http = require('http'); // Agrega esta línea
-const ioInit = require('./utils/io'); // Cambia el nombre del archivo
+const http = require('http'); 
+const ioInit = require('./utils/io'); 
 const nodemailer =require('nodemailer')
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const passport = require('passport');
 const flash = require('connect-flash');
 const { generateToken, verifyToken } = require('./utils/jwt');
+const twilio =require('twilio');
+const { addLogger }= require('./utils/logger') ;
+const swaggerJSDoc = require('swagger-jsdoc');
+const swaggerUiExpress = require('swagger-ui-express');
+const dotenv = require('dotenv');
+//const path = require('path');/
+
 
 const initializePassport = require('./config/passport.config');
 
@@ -27,7 +35,7 @@ mongoose.connect(MONGODB_CONNECT)
   });
 
 const app = express();
-
+app.use(addLogger);
 app.use(cookieParser('secretkey'));
 
 app.use(session({
@@ -43,8 +51,26 @@ initializePassport(passport);
 
 app.use(passport.initialize());
 app.use(passport.session());
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.1',
+    info: {
+      title: 'Documentación de usuarios',
+      description: 'API para gestión de ecomerce'
+    }
+  },
+  apis: [
+    `./docs/**/*.yaml`
+  ]
+}
+
+const swaggerDocs = swaggerJSDoc(swaggerOptions); 
+
+app.use('/apidocs', swaggerUiExpress.serve, swaggerUiExpress.setup(swaggerDocs));
+
 
 app.use(express.json());
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(flash());
@@ -52,6 +78,16 @@ app.use(flash());
 app.engine('handlebars', handlebars.engine());
 app.set('views', __dirname + '/views');
 app.set('view engine', 'handlebars');
+
+
+/*console.log(process.env.NODE_ENV)
+const file_path = `./.${process.env.NODE_ENV}.env`
+
+console.log({ file_path })
+
+dotenv.config({
+  path: file_path
+})*/
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -65,7 +101,6 @@ const storage = multer.diskStorage({
 const uploader = multer({ storage: storage });
 
 app.use(express.static(__dirname + '/public'));
-console.log(__dirname + '/public/img/ecommerce'); // Imprime la ruta de destino
 
 app.set('views', __dirname + '/views');
 
@@ -81,7 +116,7 @@ const viewsRouter = require('./routers/viewsRouter');
 app.use('/', viewsRouter);
 app.use('/api/sessions', sessionRouter);
 app.use('/api/products', productsRouter);
-app.use('/users', usersRouter);
+app.use('/api/users', usersRouter);
 app.use('/api/carts', cartsRouter);
 
 
@@ -89,13 +124,10 @@ const transporter = nodemailer.createTransport({
   service: 'gmail',
   port: 587,
   auth: {
-    user: 'faticarolinamelgarejo2@gmail.com',
-    pass: 'ieiu whya abik gicc',
-  },
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
+  },
 });
-console.log(path.join(__dirname, '..', 'public', 'img', 'ecommerce', 'ecommerce.png'));
-
-// ...
 
 app.get('/mail', async (req, res) => {
   try {
@@ -129,7 +161,21 @@ app.get('/mail', async (req, res) => {
   }
 });
 
-// ...
+const TWILIO_ACCOUNT_SID = 'ACdd88dbcde04ebf02c471c6ee5521d493';
+const TWILIO_AUTH_TOKEN = '9f39faf64452b7e72581b4c733829aab';
+const TWILIO_PHONE_NUMBER = '+14125047634';
+
+const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+
+app.get('/sms', async (req, res) => {
+  let result = await client.messages.create({
+    body: 'Este es un mensaje de Ecommerce',
+    from: TWILIO_PHONE_NUMBER,
+    to: '+54 11 2875 1525',
+  })
+  res.send({ status: 'success', result: 'Mensaje enviado' })
+})
+
 
 
 app.get('/healthCheck', (req, res) => {
