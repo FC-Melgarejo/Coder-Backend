@@ -1,20 +1,35 @@
 const express = require('express');
-const router = express.Router();
-const sessionsController = require('../controllers/sessionController.js');
-const UserService = require('../services/userService.js');
-const { createHash, passwordValidation } = require('../utils/passwordHash.js');
-const jwt = require('jsonwebtoken');
-const UserDTO = require('../DTO/userDTO.js');
+const { Router } = require('express');
+const passport = require('passport');
+const SessionsController = require('../controllers/sessionController');
 
-// Resto del código...
+const router = Router();
+const sessionsController = new SessionsController();
 
-router.post('/register', sessionsController.register);
-router.post('/login', sessionsController.login);
-router.get('/current', sessionsController.current);
-router.get('/unprotectedLogin', sessionsController.unprotectedLogin);
-router.get('/unprotectedCurrent', sessionsController.unprotectedCurrent);
+router.post('/register', wrapAsync(sessionsController.register));
+router.post('/login', wrapAsync(sessionsController.login));
+router.get('/current', wrapAsync(sessionsController.verifySession), wrapAsync(sessionsController.current));
+router.get('/unprotectedLogin', wrapAsync(sessionsController.verifySession), wrapAsync(sessionsController.unprotectedLogin));
+router.get('/unprotectedCurrent', wrapAsync(sessionsController.verifySession), wrapAsync(sessionsController.unprotectedCurrent));
 
-module.exports = router;
+const authRouter = express.Router();
+
+authRouter.get('/github', passport.authenticate('github'));
+authRouter.get('/github-callback', passport.authenticate('github', {
+    successRedirect: '/profile',
+    failureRedirect: '/login',
+}));
+
+module.exports = {
+    router: router,
+    authRouter: authRouter
+};
+
+function wrapAsync(fn) {
+    return function (req, res, next) {
+        fn(req, res, next).catch(next);
+    };
+}
 
 
 

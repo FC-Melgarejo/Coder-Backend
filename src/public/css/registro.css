@@ -1,0 +1,52 @@
+/* Estilos generales para el formulario */
+.registration-form {
+    max-width: 400px;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Estilos para etiquetas y campos de entrada */
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  /* Estilos para el botón de enviar */
+  input[type="submit"] {
+    background-color: #4caf50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  /* Estilos adicionales para el botón de enviar al pasar el ratón */
+  input[type="submit"]:hover {
+    background-color: #45a049;
+  }
+  
+  /* Estilos para el mensaje de error */
+  .error-message {
+    color: #ff0000;
+    margin-top: 5px;
+    font-size: 14px;
+  }
+  

@@ -2,32 +2,34 @@
 {{#if hasError}}
   <p>{{ error }}</p>
 {{/if}}
-
-<h3>Inicia sesion o<a href="/register">Registrate</a></h3>
-
-
-
-  <div class="container">
-    <h2>Iniciar Sesión</h2>
-    <form action="/api/sessions/login/" method="POST" class="login-form">
-        <div class="input-container">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" placeholder="Tu email" required>
-        </div>
-        <div class="input-container">
-            <label for="password">Contraseña</label>
-            <input type="password" id="password" name="password" placeholder="Tu contraseña" required>
-        </div>
-        <button type="submit" class="login-button">Iniciar Sesión</button>
-    </form>
+<!-- Formulario de Inicio de Sesión -->
+<div class="container">
+  <h2>Iniciar Sesión</h2>
+  <form action="/api/sessions/login" method="POST" class="login-form">
+    <div class="input-container">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" placeholder="Tu email" required>
+    </div>
+    <div class="input-container">
+      <label for="password">Contraseña</label>
+      <input type="password" id="password" name="password" placeholder="Tu contraseña" required>
+    </div>
+    <button type="submit" class="login-button">Iniciar Sesión</button>
+  </form>
 </div>
 
-<a href="./api/sessions/recovery-password">Olvidé mi contraseña</a>
+<!-- Enlace para Registrarse -->
+<h3>Inicia sesion o <a href="/register">Regístrate</a></h3>
 
+<!-- Enlace de Recuperación de Contraseña -->
+<a href="/api/sessions/recovery-password">Olvidé mi contraseña</a>
 
+<!-- Enlace para Iniciar Sesión con Github -->
 <h3>Inicia sesión con</h3>
-
 <a href="/api/sessions/github">Entrar con Github</a>
+
+<script src="/js/login.js"></script>
+
 
 
 

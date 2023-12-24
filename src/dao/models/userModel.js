@@ -21,6 +21,9 @@ const userSchema = Schema({
     type: Boolean,
     default: false // Por defecto, un usuario no es administrador
   },
+   // Otros campos del usuario
+   role: { type: String, enum: ['Buyer', 'Admin', 'Manager'], required: true },
+   // Otros campos según sea necesario
   createdAt: {
     type: Date,
     default: Date.now

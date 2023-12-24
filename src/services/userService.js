@@ -1,38 +1,57 @@
-// services/userService.js
+const User = require('../dao/models/userModel');
 const UserDao = require('../DAOs/userDaos');
 const { createHash, isValidPassword } = require('../utils/passwordHash');
 const { generateToken } = require('../utils/jwt');
 
+
+
 class UserService {
   constructor() {
     console.log("UserService initialized");
-
-    this.userDao = new UserDao();
+    this.UserModel = User;
+    this.userDao = new UserDao(); // Asigna el modelo User a this.UserModel
   }
 
-  async registerUser(userData) {
-    console.log('Calling registerUser with data:', userData);
-    
-  console.log('this.userDao.createUser is a function:', typeof this.userDao.createUser === 'function');
-  const existingUser = await this.userDao.getUserByEmail(userData.email);
-
-    console.log('Existing User:', existingUser);
-  
-    if (existingUser) {
-      throw new Error('El usuario ya existe');
+  async createUser(user) {
+      try {
+        console.log('Creating user with data:', user);
+        const newUser = new this.UserModel(user);
+        const savedUser = await newUser.save();
+        return savedUser;
+      } catch (error) {
+        console.error('Error al crear usuario:', error);
+        throw error;
+      }
     }
+    
   
-    const hashedPassword = createHash(userData.password);
-    const newUser = {
-      ...userData,
-      password: hashedPassword,
-      username: userData.email,
-      isAdmin: userData.isAdmin || false,
-    };
+
+    async registerUser(userData) {
+      try {
+        const existingUser = await this.UserModel.findOne({ email: userData.email });
+    
+        if (existingUser) {
+          throw new Error('El usuario ya existe');
+        }
+    
+        const hashedPassword = createHash(userData.password);
+        const newUser = {
+          ...userData,
+          password: hashedPassword,
+          username: userData.username || userData.email, // Usar otro campo o el correo electrónico si es necesario
+          isAdmin: userData.isAdmin || false,
+          role: userData.role || 'Buyer'
+        };
+    
+        await this.createUser(newUser);
+      } catch (error) {
+        console.error('Error al registrar usuario:', error);
+        throw error;
+      }
+    }
+    
   
-    // Corrige el nombre del método aquí
-    await this.userDao.saveUser(newUser);
-  }
+  
   
   
 
@@ -75,9 +94,18 @@ class UserService {
     const user = await this.userDao.getUserByEmail(email);
     return user;
   }
+  async getUserByEmail(email) {
+    try {
+      const user = await this.UserModel.findOne({ email });
+      return user;
+    } catch (error) {
+      console.error('Error al obtener usuario por correo electrónico:', error);
+      throw error;
+    }
+  }
   
-  
-  
+
+ 
 
 }
 

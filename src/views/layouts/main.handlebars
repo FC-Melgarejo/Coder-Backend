@@ -1,19 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Aplicación</title>
+    <!-- Agrega cualquier enlace a hojas de estilo u otras etiquetas de encabezado según sea necesario -->
 </head>
 <body>
-    <header>
-        <h1>Mi Aplicación</h1>
-        <nav>
-            <ul>
-                
-            </ul>
-        </nav>
-    </header>
+    {{ header}} <!-- Esto debería incluir el contenido del partial header.handlebars -->
     <main>
         {{{body}}}
     </main>
+    {{footer}} <!-- Esto debería incluir el contenido del partial footer.handlebars -->
 </body>
 </html>

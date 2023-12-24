@@ -16,7 +16,7 @@ module.exports = (storage) => {
   si tu hicieras storageMapper.storage no estarias haciendo storageMapper.mongo
 
   */
-  console.log({ storage })
+  
   const storageFn = storageMapper[storage] || storageMapper.default
   
   /*let storageFn
@@ -34,7 +34,6 @@ module.exports = (storage) => {
 
   const dao = storageFn()
 
-  console.log({ dao })
 
   return dao
 }

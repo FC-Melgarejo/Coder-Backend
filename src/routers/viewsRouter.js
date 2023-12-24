@@ -142,10 +142,7 @@ viewsRouter.get('/chat', async (req, res) => {
     }
 });
 
-viewsRouter.get('/error', (req, res) => {
-    const errorMessage = req.query.message || 'Ha ocurrido un error';
-    res.render('error', { title: 'Error', errorMessage: errorMessage });
-});
+
 
 viewsRouter.get('/addToCart/:cartId/:productId', async (req, res) => {
     try {
@@ -227,11 +224,13 @@ viewsRouter.get('/products/:productId', async (req, res) => {
     }
 });
 
-// Ruta para manejar errores
-viewsRouter.get('/error', (req, res) => {
-    const errorMessage = req.query.message || 'Ha ocurrido un error';
-    res.render('error', { title: 'Error', errorMessage: errorMessage });
+// Agrega esto al final de tu archivo de rutas
+viewsRouter.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).render('error', { title: 'Error', errorMessage: 'Error interno del servidor' });
 });
+
+
 
 module.exports = viewsRouter;
 

@@ -1,5 +1,10 @@
-const cartRepository = require('../repositories/cartRepository');
-const ticketService = require('./ticketService');
+const cartRepository = require('../repos/cartRepository');
+const ticketService = require('./tiketService');
+const ProductsRepository = require('../repos/productsRepository');
+const { v4: uuidv4 } = require('uuid'); 
+
+const productsRepository = new ProductsRepository();
+
 
 async function purchase(cartId) {
   const cart = await cartRepository.findById(cartId);
@@ -8,19 +13,25 @@ async function purchase(cartId) {
   const failedProducts = [];
 
   for (const item of cart.products) {
-    const product = item.productId;
-    const quantityInCart = item.quantity;
+    try {
+      const product = await productsRepository.getOne(item.product._id);
+      const quantityInCart = item.quantity;
 
-    if (product.stock >= quantityInCart) {
-      // Resta el stock del producto
-      product.stock -= quantityInCart;
-      purchasedProducts.push({
-        productId: product._id,
-        quantity: quantityInCart,
-      });
-    } else {
-      // Agrega el producto a la lista de fallos
-      failedProducts.push(product._id);
+      if (product.stock >= quantityInCart) {
+        // Resta el stock del producto
+        product.stock -= quantityInCart;
+        purchasedProducts.push({
+          productId: product._id,
+          quantity: quantityInCart,
+        });
+      } else {
+        // Agrega el producto a la lista de fallos
+        failedProducts.push(product._id);
+      }
+    } catch (error) {
+      // Manejo de errores al obtener información del producto
+      console.error(`Error al obtener información del producto: ${error.message}`);
+      failedProducts.push(item.product._id);
     }
   }
 
@@ -40,12 +51,15 @@ async function purchase(cartId) {
 }
 
 function generateUniqueCode() {
-  // Lógica para generar códigos únicos
+  return uuidv4();
 }
 
 function calculateTotalAmount(products) {
-  // Lógica para calcular el monto total de la compra
+  return products.reduce((total, product) => {
+    return total + (product.quantity * product.price); 
+  }, 0);
 }
+
 
 module.exports = {
   purchase,

@@ -1,0 +1,21 @@
+<!-- src/views/carts/purchase.handlebars -->
+
+{{> header}}
+
+<main>
+    <h2>Proceso de Compra</h2>
+    {{#if successMessage}}
+        <p class="success-message">{{successMessage}}</p>
+    {{/if}}
+    {{#if errorMessage}}
+        <p class="error-message">{{errorMessage}}</p>
+    {{/if}}
+
+    <!-- Puedes personalizar el contenido según tus necesidades -->
+
+    <div class="form-group">
+        <a href="/home">Volver a la página de inicio</a>
+    </div>
+</main>
+
+{{> footer}}

@@ -168,15 +168,21 @@ class CartsController {
     const cid = req.params.cid;
 
     try {
-      const result = await cartService.purchase(cid);
-      return res.status(200).json({ status: "success", payload: result });
+        const result = await cartService.purchase(cid);
+
+        // Si deseas actualizar el carrito con los productos que no se pudieron comprar
+        const cart = await cartManager.getCartById(cid);
+        cart.products = cart.products.filter(item => result.failedProducts.includes(item.productId.toString()));
+        await cartManager.updateCartProducts(cid, cart.products);
+
+        // Renderiza la vista de compra exitosa
+        return res.render('carts/purchase', { successMessage: 'Compra exitosa' });
     } catch (error) {
-      const commonErrorMessage = "Error al realizar la compra";
-      return res
-        .status(500)
-        .json({ error: commonErrorMessage, message: error.message });
+        // Renderiza la vista de error en caso de fallo
+        return res.render('carts/purchase', { errorMessage: 'Error al realizar la compra' });
     }
-  }
+}
+  
 }
 
 module.exports = CartsController;

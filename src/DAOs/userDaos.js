@@ -16,7 +16,7 @@ class User {
       let user = await UserModel.findOne({ email: id });
       return user;
     } catch (error) {
-      console.log(error);
+      
       return null;
     }
   };
@@ -27,7 +27,7 @@ class User {
       let result = await UserModel.create(user);
       return result;
     } catch (error) {
-      console.log(error);
+    
       return null;
     }
   };
@@ -41,7 +41,7 @@ class User {
       );
       return result;
     } catch (error) {
-      console.log(error);
+      
       return null;
     }
   };
@@ -50,7 +50,7 @@ class User {
       let user = await UserModel.findOne({ email: email });
       return user;
     } catch (error) {
-      console.log(error);
+      
       return null;
     }
   };
@@ -60,7 +60,7 @@ class User {
       let user = await UserModel.findOne({ email: email });
       return user;
     } catch (error) {
-      console.log(error);
+      
       return null;
     }
   };

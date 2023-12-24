@@ -42,7 +42,7 @@ class CartRepository {
                 throw new Error('No se encuentra el carrito');
             }
 
-            // Asegúrate de tener implementada la lógica para obtener un producto por su ID
+            
             const product = await productRepository.getProductById(productId);
 
             if (!product) {
@@ -97,6 +97,14 @@ class CartRepository {
 
             cart.products = [];
             await cart.save();
+        } catch (error) {
+            throw error;
+        }
+    }
+    async update(cart) {
+        try {
+            const updatedCart = await cart.save();
+            return updatedCart.toObject();
         } catch (error) {
             throw error;
         }
