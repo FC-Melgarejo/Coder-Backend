@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "mocha tests/*.test.js",
-    "start": "nodemon src/app.js --mode prod",
+    "start": "node server.js",
     "start-dev": "NODE_ENV=prod node server.js",
     "dev": "NODE_ENV=DEV nodemon server.js"
   },

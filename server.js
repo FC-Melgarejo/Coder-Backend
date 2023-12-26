@@ -37,22 +37,21 @@ initializeLocalLoginStrategy();
 initializeJWTStrategy();
 
 const initializePassport = require('./src/config/passport.config');
-const program = new Command() 
+const program = new Command();
 
 program
-  .option('--mode <mode>', 'Modo de trabajo', 'dev')
+  .option('--mode <mode>', 'Modo de trabajo', 'dev');
 
-program.parse()
+program.parse();
 
-const options = program.opts()
+const options = program.opts();
 
 dotenv.config({
-  path: `.env.${options.mode}`
-})
+  path: `.env.${options.mode}`,
+});
 
-const settings = config()
-
-const dbConnection = DB.getConnection(settings)
+const settings = config();
+const dbConnection = DB.getConnection(settings);
 
 const app = express();
 app.use(addLogger);

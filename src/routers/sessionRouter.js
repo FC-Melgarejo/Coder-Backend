@@ -8,9 +8,9 @@ const sessionsController = new SessionsController();
 
 router.post('/register', wrapAsync(sessionsController.register));
 router.post('/login', wrapAsync(sessionsController.login));
-router.get('/current', wrapAsync(sessionsController.verifySession), wrapAsync(sessionsController.current));
-router.get('/unprotectedLogin', wrapAsync(sessionsController.verifySession), wrapAsync(sessionsController.unprotectedLogin));
-router.get('/unprotectedCurrent', wrapAsync(sessionsController.verifySession), wrapAsync(sessionsController.unprotectedCurrent));
+router.get('/current', wrapAsync(sessionsController), wrapAsync(sessionsController.current));
+router.get('/unprotectedLogin', wrapAsync(sessionsController), wrapAsync(sessionsController.unprotectedLogin));
+router.get('/unprotectedCurrent', wrapAsync(sessionsController), wrapAsync(sessionsController.unprotectedCurrent));
 
 const authRouter = express.Router();
 

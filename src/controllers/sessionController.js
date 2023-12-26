@@ -27,7 +27,7 @@ class SessionsController {
         email,
         password: hashedPassword,
         isAdmin,
-        role: 'Buyer', // O proporciona el valor que tenga sentido para tu lógica de roles
+        role: 'Buyer', 
         username: email,
         
       };
