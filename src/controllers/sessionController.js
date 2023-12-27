@@ -14,12 +14,12 @@ class SessionsController {
       if (!first_name || !last_name || !email || !password || isAdmin === undefined) {
         return res.status(400).send({ status: 'error', error: 'Incomplete values' });
       }
-
+  
       const exists = await userService.getUserByEmail(email);
       if (exists) {
         return res.status(409).send({ status: 'error', error: 'User already exists' });
       }
-
+  
       const hashedPassword = await createHash(password);
       const user = {
         first_name,
@@ -29,25 +29,33 @@ class SessionsController {
         isAdmin,
         role: 'Buyer', 
         username: email,
-        
       };
-
+  
       const result = await userService.createUser(user);
+  
+      // Redirige solo después de haber manejado la lógica de creación de usuario
       res.redirect('/login');
-
-      // En una API, podrías devolver información sobre el usuario creado
-      res.status(201).send({ status: 'success', data: result });
+      
+      // El código de éxito ahora está condicionado por la redirección,
+      // y solo se ejecutará si no se ha redirigido anteriormente.
+      if (!res.headersSent) {
+        // En una API, podrías devolver información sobre el usuario creado
+        // Responde solo después de haber manejado todas las operaciones necesarias
+        res.status(201).send({ status: 'success', data: result });
+      }
     } catch (error) {
       console.error('Error en el controlador de registro:', error);
-
+  
       let errorMessage = 'Error interno del servidor';
       if (error.code === 11000 && error.keyPattern && error.keyPattern.username === 1) {
         errorMessage = 'Nombre de usuario ya en uso';
       }
-
+  
+      // Responde solo después de haber manejado todas las operaciones necesarias
       res.status(500).send({ status: 'error', error: errorMessage });
     }
   }
+  
   async login(req, res) {
     try {
       const { email, password } = req.body;

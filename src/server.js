@@ -7,28 +7,28 @@ const handlebars = require('express-handlebars');
 const mongoose = require('mongoose');
 const { Server } = require('socket.io');
 const http = require('http'); 
-const ioInit = require('./src/utils/io'); 
+const ioInit = require('./utils/io'); 
 const nodemailer = require('nodemailer');
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const passport = require('passport');
 const flash = require('connect-flash');
-const { generateToken, verifyToken } = require('./src/utils/jwt');
+const { generateToken, verifyToken } = require('./utils/jwt');
 const twilio = require('twilio');
-const addLogger = require('./src/utils/logger');
+const addLogger = require('./utils/logger');
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerUiExpress = require('swagger-ui-express');
 const { Command } = require('commander');
 const dotenv = require('dotenv');
 dotenv.config();
-const config = require('./src/utils/config');
-const DB = require('./src/db/singleton');
+const config = require('./utils/config');
+const DB = require('./db/singleton');
 
 // Inicializar estrategias
-const initializeGitHubStrategy = require('./src/config/github.Stategy');
-const initializeLocalRegisterStrategy = require('./src/config/local.Strategy');
-const initializeLocalLoginStrategy = require('./src/config/local.login.Strategy');
-const { initializeJWTStrategy, passportCall } = require('./src/config/jwt.Strategy');
+const initializeGitHubStrategy = require('./config/github.Stategy');
+const initializeLocalRegisterStrategy = require('./config/local.Strategy');
+const initializeLocalLoginStrategy = require('./config/local.login.Strategy');
+const { initializeJWTStrategy, passportCall } = require('./config/jwt.Strategy');
 
 
 initializeGitHubStrategy();
@@ -36,7 +36,7 @@ initializeLocalRegisterStrategy();
 initializeLocalLoginStrategy();
 initializeJWTStrategy();
 
-const initializePassport = require('./src/config/passport.config');
+const initializePassport = require('./config/passport.config');
 const program = new Command();
 
 program
@@ -97,11 +97,11 @@ const uploader = multer({ storage: storage });
 const httpServer = http.createServer(app);
 const io = ioInit(httpServer); // Inicializa Socket.io con el servidor HTTP
 
-const sessionRouter = require('./src/routers/sessionRouter');
-const usersRouter = require('./src/routers/userRouter');
-const productsRouter = require('./src/routers/productsRouter');
-const cartsRouter = require('./src/routers/cartsRouter');
-const viewsRouter = require('./src/routers/viewsRouter');
+const sessionRouter = require('./routers/sessionRouter');
+const usersRouter = require('./routers/userRouter');
+const productsRouter = require('./routers/productsRouter');
+const cartsRouter = require('./routers/cartsRouter');
+const viewsRouter = require('./routers/viewsRouter');
 const { Db } = require('mongodb');
    
 app.use('/', viewsRouter);

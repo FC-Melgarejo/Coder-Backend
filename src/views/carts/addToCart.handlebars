@@ -13,6 +13,60 @@
     <button type="submit">Cerrar Sesión</button>
 </form>
 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Aplicación</title>
+    <!-- Agrega cualquier enlace a hojas de estilo u otras etiquetas de encabezado según sea necesario -->
+    <link rel="stylesheet" href="/css/">
+</head>
+<body>
+    <!-- Esto debería incluir el contenido del partial header.handlebars -->
+    <main>
+        <p>Bienvenido, (Administrador)</p>
+        <h2>All Products</h2>
+        <ul>
+            <li>
+                <h2>Bicicleta de montaña</h2>
+                <p>Description: Bicicleta de montaña resistente y duradera, diseñada para aventuras en terrenos difíciles.</p>
+                <p>Price: 349.99</p>
+                <p>Category: Ciclismo</p>
+                <form action="/cart/add" method="post">
+                    <input type="hidden" name="productId" value="64e3c8e88233533c16f46dc5">
+                    <button type="submit">Add to Cart</button>
+                </form>
+                <a href="/products/64e3c8e88233533c16f46dc5">View Details</a>
+            </li>
+            <li>
+                <h2>Remera de montaña</h2>
+                <p>Description: Remera mangas largas Térmicas.</p>
+                <p>Price: 234.99</p>
+                <p>Category: Remeras</p>
+                <form action="/cart/add" method="post">
+                    <input type="hidden" name="productId" value="64e3c8e88233533c16f46dc5">
+                    <button type="submit">Add to Cart</button>
+                </form>
+                <a href="/products/64e3c96e8233533c16f46dc8">View Details</a>
+            </li>
+            <li>
+                <h2>Campera</h2>
+                <p>Description: Campera mangas largas Térmicas.</p>
+                <p>Price: 834.99</p>
+                <p>Category: Camperas</p>
+                <form action="/cart/add" method="post">
+                    <input type="hidden" name="productId" value="64e3c8e88233533c16f46dc5">
+                    <button type="submit">Add to Cart</button>
+                </form>
+                <a href="/products/64e3ca908233533c16f46dcb">View Details</a>
+            </li>
+        </ul>
+    </main>
+</body>
+</html>
+
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/index.js"></script>

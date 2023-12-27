@@ -1,5 +1,5 @@
 const passport = require('passport');
-const GitHubStrategy = require('passport-github2');
+const GitHubStrategy = require('passport-github2').Strategy;
 const userModel = require('../dao/models/userModel');
 
 const initializeGitHubStrategy = () => {
@@ -29,3 +29,4 @@ const initializeGitHubStrategy = () => {
 };
 
 module.exports = initializeGitHubStrategy;
+

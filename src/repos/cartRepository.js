@@ -109,6 +109,7 @@ class CartRepository {
             throw error;
         }
     }
+    
 }
 
 module.exports = CartRepository;

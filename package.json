@@ -5,10 +5,11 @@
   "main": "server.js",
   "scripts": {
     "test": "mocha tests/*.test.js",
-    "start": "node server.js",
-    "start-dev": "NODE_ENV=prod node server.js",
-    "dev": "NODE_ENV=DEV nodemon server.js"
-  },
+    "start": "node src/server.js",
+    "start-dev": "set NODE_ENV=prod && nodemon src/server.js",
+    "dev": "set NODE_ENV=DEV && nodemon src/server.js"
+  }
+  ,
   "keywords": [],
   "author": "Fatima <faticarolinamelgarejo@gmail.com>",
   "license": "ISC",

@@ -23,6 +23,9 @@ router.put('/carts/:cid/products/:pid', userMiddleware.isAuth, cartsController.u
 router.delete('/carts/:cid/products/:pid', userMiddleware.isAuth, cartsController.removeProductFromCart.bind(cartsController));
 router.delete('/carts/:cid', userMiddleware.isAuth, cartsController.clearCart.bind(cartsController));
 router.post('/carts/:cid/purchase', userMiddleware.isAuth, userMiddleware.hasRole('admin', 'user'), cartsController.purchaseCart.bind(cartsController));
+router.get('/carts/:cartId', cartsController.getCartDetails);
+router.get('/carts/:cartId', cartsController.getCartDetails);
+router.get('/carts/purchase/:cartId', cartsController.purchaseCart);
 
 // Elimina la siguiente línea, ya que es redundante
 // router.post('/carts/:cid/purchase', userMiddleware.isAuth, userMiddleware.hasRole('admin', 'user'), cartsController.purchaseCart.bind(cartsController));
