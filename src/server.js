@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
@@ -6,21 +7,21 @@ const MongoStore = require('connect-mongo');
 const handlebars = require('express-handlebars');
 const mongoose = require('mongoose');
 const { Server } = require('socket.io');
-const http = require('http'); 
-const ioInit = require('./utils/io'); 
+const http = require('http');
+const ioInit = require('./utils/io');
 const nodemailer = require('nodemailer');
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const passport = require('passport');
 const flash = require('connect-flash');
-const { generateToken, verifyToken } = require('./utils/jwt');
-const twilio = require('twilio');
 const addLogger = require('./utils/logger');
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerUiExpress = require('swagger-ui-express');
 const { Command } = require('commander');
 const dotenv = require('dotenv');
 dotenv.config();
+const twilio = require('twilio');
+
 const config = require('./utils/config');
 const DB = require('./db/singleton');
 
@@ -30,7 +31,6 @@ const initializeLocalRegisterStrategy = require('./config/local.Strategy');
 const initializeLocalLoginStrategy = require('./config/local.login.Strategy');
 const { initializeJWTStrategy, passportCall } = require('./config/jwt.Strategy');
 
-
 initializeGitHubStrategy();
 initializeLocalRegisterStrategy();
 initializeLocalLoginStrategy();
@@ -39,8 +39,7 @@ initializeJWTStrategy();
 const initializePassport = require('./config/passport.config');
 const program = new Command();
 
-program
-  .option('--mode <mode>', 'Modo de trabajo', 'dev');
+program.option('--mode <mode>', 'Modo de trabajo', 'dev');
 
 program.parse();
 
@@ -50,15 +49,36 @@ dotenv.config({
   path: `.env.${options.mode}`,
 });
 
-const settings = config();
+console.log('MONGODB_CONNECT:', process.env.MONGODB_CONNECT);
 
-const PORT = process.env.PORT || 8080;
-mongoose.set('strictQuery', true)
-const dbConnection = DB.getConnection(settings);
 
 const app = express();
-app.use(addLogger);
 
+const PORT = process.env.PORT || 8080;
+
+// Conexión a la base de datos MongoDB con Mongoose
+mongoose.connect(process.env.MONGODB_CONNECT, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+mongoose.connect(process.env.MONGODB_CONNECT, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+// Configuración de Express
+app.use(session({
+  secret: 'secretSession',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_CONNECT,
+    ttl: 14 * 24 * 60 * 60, // 14 days
+  }),
+}));
+
+app.use(addLogger);
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
 app.use(session({
@@ -68,7 +88,6 @@ app.use(session({
 }));
 
 initializePassport(passport);
-//app.use(passportCall('jwt'));//
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -96,17 +115,15 @@ const storage = multer.diskStorage({
 
 const uploader = multer({ storage: storage });
 
-
 const httpServer = http.createServer(app);
-const io = ioInit(httpServer); // Inicializa Socket.io con el servidor HTTP
+const io = ioInit(httpServer);
 
 const sessionRouter = require('./routers/sessionRouter');
 const usersRouter = require('./routers/userRouter');
 const productsRouter = require('./routers/productsRouter');
 const cartsRouter = require('./routers/cartsRouter');
 const viewsRouter = require('./routers/viewsRouter');
-const { Db } = require('mongodb');
-   
+
 app.use('/', viewsRouter);
 app.use('/api/sessions', sessionRouter.router);
 app.use('/api/products', productsRouter);
@@ -162,8 +179,8 @@ app.get('/sms', async (req, res) => {
     body: 'Este es un mensaje de Ecommerce',
     from: TWILIO_PHONE_NUMBER,
     to: '+54 11 2875 1525',
-  })
-  res.send({ status: 'success', result: 'Mensaje enviado' })
+  });
+  res.send({ status: 'success', result: 'Mensaje enviado' });
 });
 
 app.get('/healthCheck', (req, res) => {
@@ -173,16 +190,14 @@ app.get('/healthCheck', (req, res) => {
   });
 });
 
-// Manejador global de errores
 app.use((err, req, res, next) => {
   console.error('Error no manejado:', err);
   res.status(500).send('Error interno del servidor');
 });
-
-
 
 httpServer.listen(PORT, () => {
   console.log(`Servidor express escuchando en el puerto ${PORT}`);
 });
 
 module.exports = io;
+
