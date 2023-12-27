@@ -51,6 +51,8 @@ dotenv.config({
 });
 
 const settings = config();
+
+const PORT = process.env.PORT || 8080;
 mongoose.set('strictQuery', true)
 const dbConnection = DB.getConnection(settings);
 
@@ -177,7 +179,7 @@ app.use((err, req, res, next) => {
   res.status(500).send('Error interno del servidor');
 });
 
-const PORT = process.env.PORT || 8080;
+
 
 httpServer.listen(PORT, () => {
   console.log(`Servidor express escuchando en el puerto ${PORT}`);
